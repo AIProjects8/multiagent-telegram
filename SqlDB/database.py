@@ -22,17 +22,18 @@ def init_db():
     inspector = inspect(engine)
     existing_tables = inspector.get_table_names()
     
-    # TODO: It's very primitive way to check if the database is initialized.
-    # If you modified something into the database then remove docker container
-    # with command: `docker compose down -v`
-    if not existing_tables:
+    required_tables = ['users', 'agents', 'agent_items', 'scheduler', 'conversations']
+    missing_tables = [table for table in required_tables if table not in existing_tables]
+    
+    if missing_tables:
         with engine.connect() as conn:
             conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
             conn.commit()
+        
         Base.metadata.create_all(bind=engine)
-        print("Database tables created successfully")
+        print(f"Database tables created successfully: {missing_tables}")
     else:
-        print("Database tables already exist")
+        print("All required database tables already exist")
 
 def get_db():
     db = Session(engine)
