@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 from .models import Base
+from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_scheduler
 
 load_dotenv()
 
@@ -34,6 +35,15 @@ def init_db():
         print(f"Database tables created successfully: {missing_tables}")
     else:
         print("All required database tables already exist")
+    
+    db = Session(engine)
+    try:
+        init_user(db)
+        init_weather_agent(db)
+        init_agent_item(db)
+        init_scheduler(db)
+    finally:
+        db.close()
 
 def get_db():
     db = Session(engine)
