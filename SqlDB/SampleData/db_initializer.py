@@ -42,7 +42,7 @@ def init_weather_agent(db: Session):
         
         weather_agent = Agent(
             name='weather',
-            keywords='pogoda, pogodowy, pogodny',
+            keywords='pogoda,pogodowy,pogodny,pogodę,pogode',
             configuration=weather_config
         )
         
