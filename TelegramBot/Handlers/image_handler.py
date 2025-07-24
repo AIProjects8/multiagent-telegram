@@ -3,6 +3,8 @@ from telegram.ext import ContextTypes
 import os
 from TelegramBot.Tools.auth_decorator import restricted
 from SqlDB.middleware import update_db_user
+from AgentsCore.Rooter.agent_rooter import get_agent_rooter
+from SqlDB.user_cache import UserCache
 
 @restricted
 @update_db_user
@@ -16,7 +18,10 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await file.download_to_drive(image_path)
     
     # Handle image processing
-    
+    telegram_user_id: int = update.message.from_user.id
+    user_id = UserCache().get_user_id(telegram_user_id)
+    get_agent_rooter().switch(text, user_id)
+
     await update.message.reply_text("Image processed")
     
     os.remove(image_path)

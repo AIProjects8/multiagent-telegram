@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from TelegramBot.Tools.auth_decorator import restricted
 from SqlDB.middleware import update_db_user
 from SqlDB.user_cache import UserCache
+from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 
 @restricted
 @update_db_user
@@ -18,5 +19,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Handle text processing
+
+    user_id = UserCache().get_user_id(telegram_user_id)
+    switched =get_agent_rooter().switch(text, user_id)
+    agent = get_agent_rooter().current_agent[user_id]
+    if(switched):
+        await update.message.reply_text(f"Switched to agent: {agent['name']}")
+    else:
+        await update.message.reply_text(f"Agent already set: {agent['name']}")
+
     
-    await update.message.reply_text("Text processed")
+    # await update.message.reply_text("Text processed")

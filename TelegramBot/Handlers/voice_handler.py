@@ -4,7 +4,8 @@ import os
 from config import Config
 from TelegramBot.Tools.auth_decorator import restricted
 from Modules.SpeechHelper.speech_helper import SpeechHelper
-
+from AgentsCore.Rooter.agent_rooter import get_agent_rooter
+from SqlDB.user_cache import UserCache
 from SqlDB.middleware import update_db_user
 
 @restricted
@@ -18,6 +19,9 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     transcribed_text = await speech_manager.transcribe_voice(audio_path)
     
     # Handle voice processing
+    telegram_user_id: int = update.message.from_user.id
+    user_id = UserCache().get_user_id(telegram_user_id)
+    get_agent_rooter().switch(transcribed_text, user_id)
     
     os.remove(audio_path)
     

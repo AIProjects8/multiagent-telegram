@@ -51,6 +51,24 @@ def init_weather_agent(db: Session):
         print("Weather agent created successfully")
     else:
         print("Weather agent already exists")
+        
+def init_default_agent(db: Session):
+    existing_agent = db.query(Agent).filter(Agent.name == 'default').first()
+    
+    if not existing_agent:
+        config = []
+        
+        agent = Agent(
+            name='default',
+            keywords='domyślny, default',
+            configuration=config
+        )
+        
+        db.add(agent)
+        db.commit()
+        print("Default agent created successfully")
+    else:
+        print("Default agent already exists")
 
 def init_agent_item(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()

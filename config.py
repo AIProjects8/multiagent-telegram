@@ -13,6 +13,7 @@ class Config:
     voice_response: bool
     gpt_model: str
     allowed_user_ids: list[int]
+    app_keyword: str
 
     @classmethod
     def from_env(cls) -> 'Config':
@@ -27,7 +28,8 @@ class Config:
             openai_api_key=os.getenv("OPENAI_API_KEY"),
             voice_response=os.getenv("VOICE_RESPONSE"),
             gpt_model=os.getenv("GPT_MODEL"),
-            allowed_user_ids=allowed_user_ids
+            allowed_user_ids=allowed_user_ids,
+            app_keyword=os.getenv("APP_KEYWORD")
         )
 
     def validate(self) -> None:
@@ -45,6 +47,8 @@ class Config:
             missing_vars.append("GPT_MODEL")
         if not self.allowed_user_ids:
             missing_vars.append("ALLOWED_USER_IDS")
+        if not self.app_keyword:
+            missing_vars.append("APP_KEYWORD")
             
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}") 
