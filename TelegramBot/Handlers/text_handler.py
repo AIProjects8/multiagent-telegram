@@ -8,10 +8,6 @@ from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 @restricted
 @update_db_user
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if(not update.message):
-        print("No message")
-        return
-    
     message_type: str = update.message.chat.type
     text: str = update.message.text
     telegram_user_id: int = update.message.from_user.id
@@ -25,11 +21,12 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle text processing
 
     user_id = UserCache().get_user_id(telegram_user_id)
-    switched = get_agent_rooter().switch(text, user_id)
-    agent = get_agent_rooter().current_agent
+    switched =get_agent_rooter().switch(text, user_id)
+    agent = get_agent_rooter().current_agent[user_id]
     if(switched):
         await update.message.reply_text(f"Switched to agent: {agent['name']}")
     else:
         await update.message.reply_text(f"Agent already set: {agent['name']}")
 
+    
     # await update.message.reply_text("Text processed")
