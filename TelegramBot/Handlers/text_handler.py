@@ -25,8 +25,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     agent = get_agent_rooter().current_agent[user_id]
     if(switched):
         await update.message.reply_text(f"Switched to agent: {agent['name']}")
-    else:
-        await update.message.reply_text(f"Agent already set: {agent['name']}")
+
+    response =get_agent_rooter().ask_current_agent(user_id, text)
+    await update.message.reply_text(response)
+    
 
     
     # await update.message.reply_text("Text processed")

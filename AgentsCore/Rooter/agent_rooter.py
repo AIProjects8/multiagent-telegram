@@ -4,6 +4,8 @@ import os
 import json
 from config import Config
 from SqlDB.user_cache import UserCache
+from .agent_factory import AgentFactory
+from Agents.agent_base import AgentBase
 
 class AgentRooter:
     _instance = None
@@ -11,6 +13,7 @@ class AgentRooter:
     _agent_map = {}
     _app_keyword = None
     current_agent = {}
+    _agent_instances = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -25,6 +28,7 @@ class AgentRooter:
         self._agents = []
         self._agent_map = {}
         self._default_agent = None
+        self._agent_instances = {}
 
     def _load_agents(self):
         session = Session(engine)
@@ -47,6 +51,12 @@ class AgentRooter:
                     self._agent_map[kw] = agent_obj
                 if agent.name == 'default':
                     self._default_agent = agent_obj
+                
+                try:
+                    agent_instance = AgentFactory.create_agent(agent.name)
+                    self._agent_instances[agent.name] = agent_instance
+                except Exception as e:
+                    print(f"Warning: Could not create agent instance for {agent.name}: {e}")
         finally:
             session.close()
 
@@ -62,6 +72,18 @@ class AgentRooter:
         if user_id not in self.current_agent:
             self.current_agent[user_id] = self._default_agent
         return self.current_agent[user_id]
+    
+    def get_current_agent_instance(self, user_id: str) -> AgentBase:
+        current_agent = self.get_current_agent(user_id)
+        if current_agent and current_agent['name'] in self._agent_instances:
+            return self._agent_instances[current_agent['name']]
+        return None
+    
+    def ask_current_agent(self, user_id: str, message: str) -> str:
+        agent_instance = self.get_current_agent_instance(user_id)
+        if agent_instance:
+            return agent_instance.ask(user_id, message)
+        return "No agent available to respond"
 
     def switch(self, message: str, user_id: str) -> bool:
         agent = self.find_agent_in_message(message)
