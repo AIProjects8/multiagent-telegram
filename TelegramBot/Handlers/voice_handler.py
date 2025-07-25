@@ -7,6 +7,7 @@ from Modules.SpeechHelper.speech_helper import SpeechHelper
 from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 from SqlDB.user_cache import UserCache
 from SqlDB.middleware import update_db_user
+from Modules.MessageProcessor.message_processor import MessageProcessor
 
 @restricted
 @update_db_user
@@ -18,10 +19,16 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await speech_manager.download_voice_file(audio_file.file_path, audio_path)
     transcribed_text = await speech_manager.transcribe_voice(audio_path)
     
-    # Handle voice processing
+    cleaned_text = MessageProcessor.clean_message(transcribed_text)
     telegram_user_id: int = update.message.from_user.id
     user_id = UserCache().get_user_id(telegram_user_id)
-    get_agent_rooter().switch(transcribed_text, user_id)
+    switched = get_agent_rooter().switch(cleaned_text, user_id)
+    
+    if switched:
+        await update.message.reply_text(f"Switched to agent: {get_agent_rooter().current_agent[user_id]['name']}")
+    
+    if not MessageProcessor.should_process_message(cleaned_text):
+        return
     
     os.remove(audio_path)
     

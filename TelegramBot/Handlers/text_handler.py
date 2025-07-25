@@ -4,6 +4,7 @@ from TelegramBot.Tools.auth_decorator import restricted
 from SqlDB.middleware import update_db_user
 from SqlDB.user_cache import UserCache
 from AgentsCore.Rooter.agent_rooter import get_agent_rooter
+from Modules.MessageProcessor.message_processor import MessageProcessor
 
 @restricted
 @update_db_user
@@ -18,17 +19,16 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Group chats are not supported yet.")
         return
 
-    # Handle text processing
-
+    cleaned_text = MessageProcessor.clean_message(text)
+    
     user_id = UserCache().get_user_id(telegram_user_id)
-    switched =get_agent_rooter().switch(text, user_id)
+    switched = get_agent_rooter().switch(cleaned_text, user_id)
     agent = get_agent_rooter().current_agent[user_id]
     if(switched):
         await update.message.reply_text(f"Switched to agent: {agent['name']}")
 
-    response =get_agent_rooter().ask_current_agent(user_id, text)
-    await update.message.reply_text(response)
-    
+    if not MessageProcessor.should_process_message(cleaned_text):
+        return
 
-    
-    # await update.message.reply_text("Text processed")
+    response = get_agent_rooter().ask_current_agent(user_id, cleaned_text)
+    await update.message.reply_text(response)
