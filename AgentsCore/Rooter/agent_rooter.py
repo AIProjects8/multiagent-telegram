@@ -10,23 +10,26 @@ class AgentRooter:
     _agents = []
     _agent_map = {}
     _app_keyword = None
-    current_agent = {}
+    current_agent = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            cls._instance._init()
             cls._instance._load_agents()
         return cls._instance
 
-    def _load_agents(self):
+    def _init(self):
         config = Config.from_env()
         self._app_keyword = config.app_keyword.lower()
+        self._agents = []
+        self._agent_map = {}
+        self._default_agent = None
+
+    def _load_agents(self):
         session = Session(engine)
         try:
             agents = session.query(Agent).all()
-            self._agents = []
-            self._agent_map = {}
-            self._default_agent = None
             for agent in agents:
                 keywords = [k.strip().lower() for k in agent.keywords.split(',') if k.strip()]
                 configuration = agent.configuration
@@ -43,11 +46,9 @@ class AgentRooter:
                     self._agent_map[kw] = agent_obj
                 if agent.name == 'default':
                     self._default_agent = agent_obj
+                    self.current_agent = agent_obj
         finally:
             session.close()
-
-    def get_agents(self):
-        return self._agents
 
     def find_agent_in_message(self, message: str):
         msg = message.lower()
@@ -57,14 +58,10 @@ class AgentRooter:
                 return agent
         return None
 
-    def get_current_agent(self, user_id: str):
-        return self.current_agent.get(user_id, self._default_agent)
-
     def switch(self, message: str, user_id: str) -> bool:
         agent = self.find_agent_in_message(message)
-        current_agent = self.current_agent.get(user_id, self._default_agent)
-        if agent and (current_agent is None or agent['id'] != current_agent['id']):
-            self.current_agent[user_id] = agent
+        if agent and (agent['id'] != self.current_agent['id']):
+            self.current_agent = agent
             print(f"Switched to agent: {agent['id']} for user: {user_id}")
             return True
         return False
