@@ -15,18 +15,22 @@ class AgentRooter:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            cls._instance._init()
             cls._instance._load_agents()
         return cls._instance
-
-    def _load_agents(self):
+      
+    def _init(self):
         config = Config.from_env()
         self._app_keyword = config.app_keyword.lower()
+        self._agents = []
+        self._agent_map = {}
+        self._default_agent = None
+
+    def _load_agents(self):
         session = Session(engine)
         try:
             agents = session.query(Agent).all()
-            self._agents = []
-            self._agent_map = {}
-            self._default_agent = None
+            
             for agent in agents:
                 keywords = [k.strip().lower() for k in agent.keywords.split(',') if k.strip()]
                 configuration = agent.configuration
@@ -46,9 +50,6 @@ class AgentRooter:
         finally:
             session.close()
 
-    def get_agents(self):
-        return self._agents
-
     def find_agent_in_message(self, message: str):
         msg = message.lower()
         for kw, agent in self._agent_map.items():
@@ -58,12 +59,14 @@ class AgentRooter:
         return None
 
     def get_current_agent(self, user_id: str):
-        return self.current_agent.get(user_id, self._default_agent)
+        if user_id not in self.current_agent:
+            self.current_agent[user_id] = self._default_agent
+        return self.current_agent[user_id]
 
     def switch(self, message: str, user_id: str) -> bool:
         agent = self.find_agent_in_message(message)
-        current_agent = self.current_agent.get(user_id, self._default_agent)
-        if agent and (current_agent is None or agent['id'] != current_agent['id']):
+        temp_current_agent = self.get_current_agent(user_id)
+        if agent and (temp_current_agent is None or agent['id'] != temp_current_agent['id']):
             self.current_agent[user_id] = agent
             print(f"Switched to agent: {agent['id']} for user: {user_id}")
             return True
