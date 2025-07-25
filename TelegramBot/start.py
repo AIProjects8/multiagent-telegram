@@ -8,14 +8,12 @@ from TelegramBot.Commands.help_command import help_command
 from TelegramBot.Handlers.errors_handler import error
 from SqlDB.database import init_db
 
-# Initialize configuration
 config = Config.from_env()
 config.validate()
 
 def start():
     print("Starting bot...")
     
-    # Initialize database
     print("Initializing database...")
     init_db()
     

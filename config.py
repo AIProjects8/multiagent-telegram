@@ -10,6 +10,7 @@ class Config:
     telegram_bot_token: str
     bot_username: str
     openai_api_key: str
+    langsmith_api_key: str
     voice_response: bool
     gpt_model: str
     allowed_user_ids: list[int]
@@ -26,11 +27,12 @@ class Config:
             telegram_bot_token=os.getenv("TELEGRAM_BOT_API_KEY"),
             bot_username=os.getenv("BOT_USERNAME"),
             openai_api_key=os.getenv("OPENAI_API_KEY"),
+            langsmith_api_key=os.getenv("LANGSMITH_API_KEY"),
             voice_response=os.getenv("VOICE_RESPONSE"),
             gpt_model=os.getenv("GPT_MODEL"),
             allowed_user_ids=allowed_user_ids,
             app_keyword=os.getenv("APP_KEYWORD")
-        )
+    )
 
     def validate(self) -> None:
         missing_vars = []
@@ -41,6 +43,8 @@ class Config:
             missing_vars.append("BOT_USERNAME")
         if not self.openai_api_key:
             missing_vars.append("OPENAI_API_KEY")
+        if not self.langsmith_api_key:
+            missing_vars.append("LANGSMITH_API_KEY")
         if not self.voice_response:
             missing_vars.append("VOICE_RESPONSE")
         if not self.gpt_model:
