@@ -3,6 +3,7 @@
     "dotenv",
     "LANGCHAIN",
     "multiagent",
+    "suntime",
     "TAVILY"
   ]
 }

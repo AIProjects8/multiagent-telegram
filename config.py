@@ -11,6 +11,7 @@ class Config:
     bot_username: str
     openai_api_key: str
     langsmith_api_key: str
+    open_weather_map_api_key: str
     voice_response: bool
     gpt_model: str
     allowed_user_ids: list[int]
@@ -28,6 +29,7 @@ class Config:
             bot_username=os.getenv("BOT_USERNAME"),
             openai_api_key=os.getenv("OPENAI_API_KEY"),
             langsmith_api_key=os.getenv("LANGSMITH_API_KEY"),
+            open_weather_map_api_key=os.getenv("OPEN_WEATHER_MAP_API_KEY"),
             voice_response=os.getenv("VOICE_RESPONSE"),
             gpt_model=os.getenv("GPT_MODEL"),
             allowed_user_ids=allowed_user_ids,
@@ -45,6 +47,8 @@ class Config:
             missing_vars.append("OPENAI_API_KEY")
         if not self.langsmith_api_key:
             missing_vars.append("LANGSMITH_API_KEY")
+        if not self.open_weather_map_api_key:
+            missing_vars.append("OPEN_WEATHER_MAP_API_KEY")
         if not self.voice_response:
             missing_vars.append("VOICE_RESPONSE")
         if not self.gpt_model:
