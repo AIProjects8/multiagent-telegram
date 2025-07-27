@@ -1,6 +1,6 @@
 import importlib
 import os
-from typing import Dict, Type
+from typing import Dict, Type, Optional
 from Agents.agent_base import AgentBase
 
 class AgentFactory:    
@@ -32,9 +32,9 @@ class AgentFactory:
             raise ValueError(f"Could not load agent {agent_name}: {str(e)}")
     
     @classmethod
-    def create_agent(cls, agent_name: str) -> AgentBase:
+    def create_agent(cls, agent_name: str, user_id: str, configuration: dict, questionnaire_answers: Optional[dict] = None) -> AgentBase:
         agent_class = cls.get_agent_class(agent_name)
-        return agent_class()
+        return agent_class(user_id, configuration, questionnaire_answers)
     
     @classmethod
     def get_available_agents(cls) -> list[str]:

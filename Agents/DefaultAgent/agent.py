@@ -5,12 +5,13 @@ from config import Config
 import os
 
 class DefaultAgent(AgentBase):
-    def __init__(self):
+    def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
+        super().__init__(user_id, configuration, questionnaire_answers)
         self.config = Config.from_env()
         self.llm = ChatOpenAI(
             api_key=self.config.openai_api_key,
             model=self.config.gpt_model,
-            temperature=0.7,
+            temperature=self.configuration.get('temperature', 0.7),
             max_tokens=1000
         )
     

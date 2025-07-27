@@ -36,13 +36,23 @@ class WeatherAgent(AgentBase):
         12: "grudnia"
     }
     
-    def __init__(self):
+    def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
+        super().__init__(user_id, configuration, questionnaire_answers)
         self.config = Config.from_env()
         self.llm = ChatOpenAI(
             api_key=self.config.openai_api_key,
             model=self.config.gpt_model,
-            temperature=0
+            temperature=self.configuration.get('temperature', 0)
         )
+    
+    def _get_user_city_info(self) -> tuple[str, float, float]:
+        city_name = self.questionnaire_answers.get('city_name')
+        city_lat = self.questionnaire_answers.get('city_lat')
+        city_lon = self.questionnaire_answers.get('city_lon')
+        
+        if city_name and city_lat and city_lon:
+            return city_name, city_lat, city_lon
+        return None, None, None
     
     def _extract_city_name(self, message: str) -> str:
         system_prompt = """Wyciągnij nazwę miasta z wiadomości użytkownika i przekonwertuj ją do formy podstawowej (mianownik).
@@ -247,12 +257,21 @@ class WeatherAgent(AgentBase):
             return f"{', '.join(ranges[:-1])} i {ranges[-1]}"
     
     def ask(self, message: str) -> str:
+        user_city_name, user_city_lat, user_city_lon = self._get_user_city_info()
+        
         city_name = self._extract_city_name(message)
         
         if not city_name:
-            return "Nie mogę podać prognozy pogody bez znajomości nazwy miasta. Proszę podać nazwę miasta."
-        
-        lat, lon = self._get_coordinates(city_name)
+            if user_city_name:
+                city_name = user_city_name
+                lat, lon = user_city_lat, user_city_lon
+            else:
+                return "Nie mogę podać prognozy pogody bez znajomości nazwy miasta. Proszę podać nazwę miasta lub skonfiguruj domyślne miasto w ustawieniach."
+        else:
+            if user_city_name and city_name.lower() == user_city_name.lower():
+                lat, lon = user_city_lat, user_city_lon
+            else:
+                lat, lon = self._get_coordinates(city_name)
         
         if lat is None or lon is None:
             return f"Przepraszam, nie udało się znaleźć współrzędnych dla '{city_name}'. Sprawdź nazwę miasta i spróbuj ponownie."

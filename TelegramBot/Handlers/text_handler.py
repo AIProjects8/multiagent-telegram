@@ -23,7 +23,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     user_id = UserCache().get_user_id(telegram_user_id)
     switched = get_agent_rooter().switch(cleaned_text, user_id)
-    agent = get_agent_rooter().current_agent[user_id]
+    agent = get_agent_rooter().current_agents[user_id]
     if(switched):
         await update.message.reply_text(f"Switched to agent: {agent['name']}")
 

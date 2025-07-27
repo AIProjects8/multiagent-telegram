@@ -25,7 +25,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     switched = get_agent_rooter().switch(cleaned_text, user_id)
     
     if switched:
-        await update.message.reply_text(f"Switched to agent: {get_agent_rooter().current_agent[user_id]['name']}")
+        await update.message.reply_text(f"Switched to agent: {get_agent_rooter().current_agents[user_id]['name']}")
     
     if not MessageProcessor.should_process_message(cleaned_text):
         return

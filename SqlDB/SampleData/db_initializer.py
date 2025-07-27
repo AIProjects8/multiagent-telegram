@@ -21,24 +21,9 @@ def init_weather_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'weather').first()
     
     if not existing_agent:
-        weather_config = [
-            {
-                "name": "city_name",
-                "type": "string"
-            },
-            {
-                "name": "city_lat",
-                "type": "float"
-            },
-            {
-                "name": "city_lon",
-                "type": "float"
-            },
-            {
-                "name": "scheduler_active",
-                "type": "bool"
-            }
-        ]
+        weather_config = {
+            "temperature": 0.7
+        }
         
         weather_agent = Agent(
             name='weather',
@@ -56,7 +41,7 @@ def init_default_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'default').first()
     
     if not existing_agent:
-        config = []
+        config = {}
         
         agent = Agent(
             name='default',
