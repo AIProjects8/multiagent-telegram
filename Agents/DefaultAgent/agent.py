@@ -14,7 +14,7 @@ class DefaultAgent(AgentBase):
             max_tokens=1000
         )
     
-    def ask(self, user_id: str, message: str) -> str:
+    def ask(self, message: str) -> str:
         system_prompt = f"You are a helpful AI assistant responding to user. Provide clear, concise, and helpful responses. Always respond in Polish."
         
         messages = [

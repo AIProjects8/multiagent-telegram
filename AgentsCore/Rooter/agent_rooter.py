@@ -82,7 +82,7 @@ class AgentRooter:
     def ask_current_agent(self, user_id: str, message: str) -> str:
         agent_instance = self.get_current_agent_instance(user_id)
         if agent_instance:
-            return agent_instance.ask(user_id, message)
+            return agent_instance.ask(message)
         return "No agent available to respond"
 
     def switch(self, message: str, user_id: str) -> bool:

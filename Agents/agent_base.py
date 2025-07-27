@@ -5,7 +5,7 @@ class AgentBase(ABC):
     """Base interface for all agents in the system"""
     
     @abstractmethod
-    def ask(self, user_id: str, message: str) -> str:
+    def ask(self, message: str) -> str:
         """Process a user message and return a response"""
         pass
     

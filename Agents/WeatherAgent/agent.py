@@ -246,7 +246,7 @@ class WeatherAgent(AgentBase):
         else:
             return f"{', '.join(ranges[:-1])} i {ranges[-1]}"
     
-    def ask(self, user_id: str, message: str) -> str:
+    def ask(self, message: str) -> str:
         city_name = self._extract_city_name(message)
         
         if not city_name:
