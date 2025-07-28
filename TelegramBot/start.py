@@ -7,6 +7,7 @@ from TelegramBot.Commands.start_command import start_command
 from TelegramBot.Commands.help_command import help_command
 from TelegramBot.Handlers.errors_handler import error
 from SqlDB.database import init_db
+from Modules.Scheduler.scheduler import SchedulerService
 
 config = Config.from_env()
 config.validate()
@@ -27,6 +28,9 @@ def start():
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
     
     app.add_error_handler(error)
+    
+    scheduler = SchedulerService(app)
+    scheduler.start()
     
     print("Bot is running...")
     app.run_polling(poll_interval=3)
