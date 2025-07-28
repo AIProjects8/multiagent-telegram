@@ -12,6 +12,7 @@ class User(Base):
     id = Column(PostgresUUID(as_uuid=True), primary_key=True,
                 server_default=text('uuid_generate_v4()'))
     telegram_id = Column(BigInteger, unique=True, nullable=False)
+    chat_id = Column(BigInteger, unique=True, nullable=False)
     name = Column(String(255))
 
 
@@ -44,6 +45,7 @@ class Scheduler(Base):
     user_id = Column(PostgresUUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     agent_id = Column(PostgresUUID(as_uuid=True), ForeignKey('agents.id'), nullable=False)
     time = Column(Time, nullable=False)
+    prompt = Column(Text, nullable=False)
 
 
 class Conversation(Base):

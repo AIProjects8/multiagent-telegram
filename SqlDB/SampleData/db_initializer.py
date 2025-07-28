@@ -8,7 +8,8 @@ def init_user(db: Session):
     if not existing_user:
         user = User(
             telegram_id=8133073522,
-            name="Test User"
+            name="Test User",
+            chat_id=0
         )
         
         db.add(user)
@@ -116,7 +117,8 @@ def init_scheduler(db: Session):
     scheduler = Scheduler(
         user_id=user.id,
         agent_id=weather_agent.id,
-        time=time(7, 0)
+        time=time(22, 30),
+        prompt="Agent pogoda. Prognoza pogody na dziś"
     )
     
     db.add(scheduler)

@@ -95,10 +95,10 @@ class WeatherAgent(AgentBase):
         
         now = datetime.now()
 
-        day_name = self.day_names[now.weekday()]
+        day_name = day_names[now.weekday()]
         day = now.day
 
-        month_name = self.month_names[now.month]
+        month_name = month_names[now.month]
         
         response = f"Prognoza dla miejscowości {city_name} na {day_name} {day} {month_name}. "
         

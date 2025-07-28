@@ -38,7 +38,7 @@ def init_db():
     
     db = Session(engine)
     try:
-        init_user(db)
+        init_user(db)   
         init_weather_agent(db)
         init_default_agent(db)
         init_agent_item(db)
