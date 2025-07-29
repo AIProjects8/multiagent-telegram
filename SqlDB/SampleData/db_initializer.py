@@ -9,7 +9,7 @@ def init_user(db: Session):
         user = User(
             telegram_id=8133073522,
             name="Test User",
-            chat_id=0
+            chat_id=8133073522
         )
         
         db.add(user)
@@ -118,7 +118,8 @@ def init_scheduler(db: Session):
         user_id=user.id,
         agent_id=weather_agent.id,
         time=time(22, 30),
-        prompt="Agent pogoda. Prognoza pogody na dziś"
+        prompt="Agent pogoda. Prognoza pogody na dziś",
+        message_type="voice"
     )
     
     db.add(scheduler)

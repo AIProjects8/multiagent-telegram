@@ -9,6 +9,9 @@ import logging
 from uuid import UUID
 from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 from Modules.MessageProcessor.message_processor import MessageProcessor
+from Modules.SpeechHelper.speech_helper import SpeechHelper
+import tempfile
+import os
 
 class SchedulerService:
     def __init__(self, app: Application):
@@ -26,7 +29,6 @@ class SchedulerService:
         self.logger.info("Scheduler stopped")
     
     def _load_scheduler_configuration(self):
-        try:
             db = next(get_db())
             try:
                 scheduler_configs = db.query(Scheduler).all()
@@ -35,24 +37,24 @@ class SchedulerService:
                     self._schedule_message(config)
                     
                 self.logger.info(f"Loaded {len(scheduler_configs)} scheduler configurations")
+            except Exception as e:
+                self.logger.error(f"Error loading scheduler configuration: {e}")
             finally:
                 db.close()
-        except Exception as e:
-            self.logger.error(f"Error loading scheduler configuration: {e}")
     
     def _schedule_message(self, scheduler_config: Scheduler):
         try:
             user_id_str = str(scheduler_config.user_id)
             agent_id_str = str(scheduler_config.agent_id)
             job_id = f"scheduler_{user_id_str}_{agent_id_str}"
-            
+            self.logger.info(f"Scheduling message for user {user_id_str} and agent {agent_id_str} at {scheduler_config.time}")
             self.scheduler.add_job(
                 func=self._send_scheduled_message,
                 trigger=CronTrigger(hour=scheduler_config.time.hour, minute=scheduler_config.time.minute),
                 id=job_id,
                 name=f'Scheduled message for user {user_id_str} and agent {agent_id_str}',
                 replace_existing=True,
-                args=[user_id_str, scheduler_config.prompt]
+                args=[user_id_str, scheduler_config.prompt, scheduler_config.message_type]
             )
             
             self.logger.info(f"Scheduled message for user {user_id_str} and agent {agent_id_str} at {scheduler_config.time}")
@@ -60,7 +62,7 @@ class SchedulerService:
         except Exception as e:
             self.logger.error(f"Error scheduling message for user {scheduler_config.user_id} and agent {scheduler_config.agent_id}: {e}")
     
-    async def _send_scheduled_message(self, user_id: str, prompt: str):
+    async def _send_scheduled_message(self, user_id: str, prompt: str, message_type: str = 'text'):
         try:
             db = next(get_db())
             try:
@@ -72,14 +74,35 @@ class SchedulerService:
                     agent_rooter.switch(text, user_id)
                     response = agent_rooter.ask_current_agent(user_id, text)
                     
-                    await self.app.bot.send_message(
-                        chat_id=user.chat_id,
-                        text=response
-                    )
-                    self.logger.info(f"Sent scheduled message response to user {user.telegram_id}")
+                    if message_type == 'voice':
+                        await self._send_voice_message(user.chat_id, response, user.telegram_id)
+                    else:
+                        await self.app.bot.send_message(
+                            chat_id=user.chat_id,
+                            text=response
+                        )
+                        self.logger.info(f"Sent scheduled text message to user {user.telegram_id}")
                 else:
                     self.logger.warning(f"User with id {user_id} not found")
             finally:
                 db.close()
         except Exception as e:
             self.logger.error(f"Error sending scheduled message to user {user_id}: {e}")
+    
+    async def _send_voice_message(self, chat_id: int, text: str, user_telegram_id: int):
+        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
+            temp_path = temp_file.name
+        
+        try:
+            speech_helper = SpeechHelper()
+            await speech_helper.text_to_speech(text, temp_path)
+            
+            with open(temp_path, 'rb') as audio_file:
+                await self.app.bot.send_voice(
+                    chat_id=chat_id,
+                    voice=audio_file
+                )
+            self.logger.info(f"Sent scheduled voice message to user {user_telegram_id}")
+        finally:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)

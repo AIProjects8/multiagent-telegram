@@ -46,6 +46,7 @@ class Scheduler(Base):
     agent_id = Column(PostgresUUID(as_uuid=True), ForeignKey('agents.id'), nullable=False)
     time = Column(Time, nullable=False)
     prompt = Column(Text, nullable=False)
+    message_type = Column(String(10), nullable=False, default='text')
 
 
 class Conversation(Base):
