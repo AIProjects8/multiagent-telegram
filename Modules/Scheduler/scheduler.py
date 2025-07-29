@@ -7,6 +7,8 @@ from SqlDB.models import Scheduler, User
 from datetime import time
 import logging
 from uuid import UUID
+from AgentsCore.Rooter.agent_rooter import get_agent_rooter
+from Modules.MessageProcessor.message_processor import MessageProcessor
 
 class SchedulerService:
     def __init__(self, app: Application):
@@ -65,11 +67,16 @@ class SchedulerService:
                 user_uuid = UUID(user_id)
                 user = db.query(User).filter(User.id == user_uuid).first()
                 if user:
+                    text = MessageProcessor.clean_message(prompt)
+                    agent_rooter = get_agent_rooter()
+                    agent_rooter.switch(text, user_id)
+                    response = agent_rooter.ask_current_agent(user_id, text)
+                    
                     await self.app.bot.send_message(
                         chat_id=user.chat_id,
-                        text=prompt
+                        text=response
                     )
-                    self.logger.info(f"Sent scheduled message to user {user.telegram_id}")
+                    self.logger.info(f"Sent scheduled message response to user {user.telegram_id}")
                 else:
                     self.logger.warning(f"User with id {user_id} not found")
             finally:
