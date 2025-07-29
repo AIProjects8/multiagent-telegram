@@ -11,6 +11,46 @@ from Agents.WeatherAgent.constants import day_names, month_names
 from config import Config
 from suntime import Sun
 
+def convert_numbers_to_polish_words(text: str, llm: ChatOpenAI) -> str:
+    prompt = """Zamień wszystkie liczby, daty i godziny w tekście na ich słowną wersję w języku polskim.
+
+Przykłady konwersji:
+- "od 23 do 3" → "od dwudziestej trzeciej do trzeciej"
+- "o 15" → "o piętnastej"
+- "od 5:04" → "od piątej zero cztery"
+- "29 lipca" → "dwudziestego dziewiątego lipca"
+- "23 lipca" → "dwudziestego trzeciego lipca"
+- "1 stycznia" → "pierwszego stycznia"
+- "o 12:30" → "o dwunastej trzydzieści"
+- "od 19:00 do 23:00" → "od dziewiętnastej do dwudziestej trzeciej"
+- "od 14 do 23 stopni Celsjusza" → "od czternastu do dwudziestu trzech stopni Celsjusza"
+- "temperatura od 5 do 15 stopni" → "temperatura od pięciu do piętnastu stopni"
+- "od 00:00 do 4:00" → "od północy do czwartej rano"
+- "o 6:30" → "o szóstej trzydzieści rano"
+- "od 1:00 do 9:00" → "od pierwszej do dziewiątej rano"
+
+Zasady:
+1. Godziny zamieniaj na liczebniki porządkowe (pierwsza, druga, trzecia, czwarta, piąta, szósta, siódma, ósma, dziewiąta, dziesiąta, jedenasta, dwunasta, trzynasta, czternasta, piętnasta, szesnasta, siedemnasta, osiemnasta, dziewiętnasta, dwudziesta, dwudziesta pierwsza, dwudziesta druga, dwudziesta trzecia)
+2. Daty zamieniaj na liczebniki porządkowe w dopełniaczu (pierwszego, drugiego, trzeciego, czwartego, piątego, szóstego, siódmego, ósmego, dziewiątego, dziesiątego, jedenastego, dwunastego, trzynastego, czternastego, piętnastego, szesnastego, siedemnastego, osiemnastego, dziewiętnastego, dwudziestego, dwudziestego pierwszego, dwudziestego drugiego, dwudziestego trzeciego, dwudziestego czwartego, dwudziestego piątego, dwudziestego szóstego, dwudziestego siódmego, dwudziestego ósmego, dwudziestego dziewiątego, trzydziestego, trzydziestego pierwszego)
+3. Temperatury zamieniaj na liczebniki kardynalne w dopełniaczu (od pięciu, od sześciu, od siedmiu, od ośmiu, od dziewięciu, od dziesięciu, od jedenastu, od dwunastu, od trzynastu, od czternastu, od piętnastu, od szesnastu, od siedemnastu, od osiemnastu, od dziewiętnastu, od dwudziestu, od dwudziestu jeden, od dwudziestu dwóch, od dwudziestu trzech, do pięciu, do sześciu, do siedmiu, do ośmiu, do dziewięciu, do dziesięciu, do jedenastu, do dwunastu, do trzynastu, do czternastu, do piętnastu, do szesnastu, do siedemnastu, do osiemnastu, do dziewiętnastu, do dwudziestu, do dwudziestu jeden, do dwudziestu dwóch, do dwudziestu trzech)
+4. Godzina 00:00 to "północ" np. od 00:00 do 4:00 to "od północy do czwartej rano"
+5. Godziny od 1:00 do 9:00 dodaj "rano" (np. "pierwszej rano", "szóstej rano", "dziewiątej rano")
+6. Minuty czytaj jako osobne liczby (np. "zero cztery" dla 04, "trzydzieści" dla 30)
+7. Zachowaj wszystkie inne elementy tekstu bez zmian
+
+Tekst do konwersji:
+{text}
+
+Odpowiedz tylko przekonwertowanym tekstem, bez dodatkowych komentarzy."""
+    
+    messages = [
+        SystemMessage(content=prompt),
+        HumanMessage(content=text)
+    ]
+    
+    response = llm.invoke(messages)
+    return response.content.strip()
+
 class WeatherAgent(AgentBase):
     
     def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
@@ -100,7 +140,7 @@ class WeatherAgent(AgentBase):
 
         month_name = month_names[now.month]
         
-        response = f"Prognoza dla miejscowości {city_name} na {day_name} {day} {month_name}. "
+        response = f"Prognoza pogody dla miejscowości {city_name} na {day_name} {day} {month_name}. "
         
         if min_temp is not None and max_temp is not None:
             min_temp_rounded = round(min_temp)
@@ -171,9 +211,7 @@ class WeatherAgent(AgentBase):
         if not any([rain_hours, snow_hours]):
             response += "Nie przewiduje się opadów. "
         
-        if not any([rain_hours, snow_hours, fog_hours, strong_wind_hours]):
-            response += "Nie przewiduje się ekstremalnych warunków pogodowych. "
-        
+
         try:
             sun = Sun(lat, lon)
             today = datetime.now()
@@ -254,7 +292,8 @@ class WeatherAgent(AgentBase):
             return f"Przepraszam, nie udało się znaleźć współrzędnych dla '{city_name}'. Sprawdź nazwę miasta i spróbuj ponownie."
         
         weather_data = get_weather(lat, lon)
-        return self._format_weather_response(weather_data, lat, lon, city_name)
+        response = self._format_weather_response(weather_data, lat, lon, city_name)
+        return convert_numbers_to_polish_words(response, self.llm)
     
     @property
     def name(self) -> str:

@@ -1,7 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from telegram.ext import Application
-from sqlalchemy.orm import Session
 from SqlDB.database import get_db
 from SqlDB.models import Scheduler, User
 from datetime import time
