@@ -30,7 +30,11 @@ def start():
     app.add_error_handler(error)
     
     scheduler = SchedulerService(app)
-    scheduler.start()
+    
+    async def start_scheduler(context):
+        scheduler.start()
+    
+    app.job_queue.run_once(start_scheduler, when=0)
     
     print("Bot is running...")
     app.run_polling(poll_interval=3)
