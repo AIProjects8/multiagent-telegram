@@ -12,10 +12,18 @@ def get_database_url():
     POSTGRES_USER = os.getenv('POSTGRES_USER') 
     POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD') 
     POSTGRES_DB = os.getenv('POSTGRES_DB') 
+    POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
+    POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+    
+    print(f"POSTGRES_USER: {POSTGRES_USER}")
+    print(f"POSTGRES_PASSWORD: {POSTGRES_PASSWORD}")
+    print(f"POSTGRES_DB: {POSTGRES_DB}")
+    print(f"POSTGRES_HOST: {POSTGRES_HOST}")
+    print(f"POSTGRES_PORT: {POSTGRES_PORT}")
     
     if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]): 
         raise EnvironmentError("Database environment variables are not fully set.") 
-    return f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}'
+    return f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
 
 engine = create_engine(get_database_url())
 
@@ -51,4 +59,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
