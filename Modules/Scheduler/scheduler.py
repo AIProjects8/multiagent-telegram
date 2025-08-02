@@ -20,15 +20,27 @@ class SchedulerService:
     
     def start(self):
         self.logger.info("Starting Scheduler")
-        self.scheduler.start()
-        self._load_scheduler_configuration()
-        self.logger.info("Scheduler started")
+        try:
+            self.scheduler.start()
+            self._load_scheduler_configuration()
+            self.logger.info("Scheduler started")
+        except RuntimeError as e:
+            if "no running event loop" in str(e):
+                self.logger.info("Scheduler will start when event loop is available")
+            else:
+                raise e
 
     
     def stop(self):
         self.logger.info("Stopping Scheduler")
         self.scheduler.shutdown()
         self.logger.info("Scheduler stopped")
+    
+    def start_with_event_loop(self):
+        self.logger.info("Starting Scheduler with event loop")
+        self.scheduler.start()
+        self._load_scheduler_configuration()
+        self.logger.info("Scheduler started")
     
     def _load_scheduler_configuration(self):
         self.logger.info("Loading scheduler configuration")

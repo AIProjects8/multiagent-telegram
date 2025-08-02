@@ -117,7 +117,7 @@ def init_scheduler(db: Session):
     scheduler = Scheduler(
         user_id=user.id,
         agent_id=weather_agent.id,
-        time=time(7, 00),
+        time=time(20, 00),
         prompt="Agent pogoda. Prognoza pogody na dziś",
         message_type="voice"
     )
