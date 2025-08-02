@@ -19,27 +19,31 @@ class SchedulerService:
         self.logger = logging.getLogger(__name__)
     
     def start(self):
+        self.logger.info("Starting Scheduler")
         self.scheduler.start()
         self._load_scheduler_configuration()
         self.logger.info("Scheduler started")
+
     
     def stop(self):
+        self.logger.info("Stopping Scheduler")
         self.scheduler.shutdown()
         self.logger.info("Scheduler stopped")
     
     def _load_scheduler_configuration(self):
-            db = next(get_db())
-            try:
-                scheduler_configs = db.query(Scheduler).all()
+        self.logger.info("Loading scheduler configuration")
+        db = next(get_db())
+        try:
+            scheduler_configs = db.query(Scheduler).all()
+            
+            for config in scheduler_configs:
+                self._schedule_message(config)
                 
-                for config in scheduler_configs:
-                    self._schedule_message(config)
-                    
-                self.logger.info(f"Loaded {len(scheduler_configs)} scheduler configurations")
-            except Exception as e:
-                self.logger.error(f"Error loading scheduler configuration: {e}")
-            finally:
-                db.close()
+            self.logger.info(f"Loaded {len(scheduler_configs)} scheduler configurations")
+        except Exception as e:
+            self.logger.error(f"Error loading scheduler configuration: {e}")
+        finally:
+            db.close()
     
     def _schedule_message(self, scheduler_config: Scheduler):
         try:

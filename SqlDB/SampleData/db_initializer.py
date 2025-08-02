@@ -124,4 +124,4 @@ def init_scheduler(db: Session):
     
     db.add(scheduler)
     db.commit()
-    print(f"Scheduler created successfully for 7:00 AM with ID: {scheduler.id}") 
+    print(f"Scheduler created successfully for {scheduler.time.strftime('%H:%M')} with ID: {scheduler.id}")
