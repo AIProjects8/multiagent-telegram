@@ -53,7 +53,7 @@ services:
       bot:
         condition: service_started
     restart: unless-stopped
-    command: ["sh", "TelegramBotScheduler/start.sh"]
+    command: ["sh", "-c", "sleep 20 && python TelegramBotScheduler/main.py"]
 
 volumes:
   postgres_data:
