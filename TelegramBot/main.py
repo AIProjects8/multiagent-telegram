@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from config import Config
 from TelegramBot.Handlers.image_handler import handle_image
@@ -7,7 +12,7 @@ from TelegramBot.Commands.start_command import start_command
 from TelegramBot.Commands.help_command import help_command
 from TelegramBot.Handlers.errors_handler import error
 from SqlDB.database import init_db
-from Modules.Scheduler.scheduler import SchedulerService
+import logging
 
 config = Config.from_env()
 config.validate()
@@ -29,12 +34,24 @@ def start():
     
     app.add_error_handler(error)
     
-    scheduler = SchedulerService(app)
-    
-    async def start_scheduler():
-        scheduler.start_with_event_loop()
-    
-    app.job_queue.run_once(start_scheduler, when=0)
-    
     print("Bot is running...")
     app.run_polling(poll_interval=3)
+    
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
+    
+    print("Starting telegram bot. Version 0.0.2")
+    
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+    logging.getLogger('telegram').setLevel(logging.WARNING)
+    logging.getLogger('telegram.ext').setLevel(logging.WARNING)
+    logging.getLogger('telegram.request').setLevel(logging.WARNING)
+    logging.getLogger('telegram.ext._application').setLevel(logging.WARNING)
+    
+    start()

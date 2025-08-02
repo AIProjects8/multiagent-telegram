@@ -5,12 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python Debugger: Telegram",
+      "name": "Python Debugger: Telegram Bot",
       "type": "debugpy",
       "request": "launch",
-      "program": "main.py",
+      "program": "TelegramBot/main.py",
       "console": "integratedTerminal",
       "args": "-a 1234567890"
+    },
+    {
+      "name": "Python Debugger: Telegram Scheduler",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "TelegramBotScheduler/main.py",
+      "console": "integratedTerminal"
     }
   ]
 }

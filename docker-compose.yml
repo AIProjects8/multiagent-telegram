@@ -19,7 +19,9 @@ services:
       retries: 5
 
   bot:
-    build: .  
+    build:
+      context: .
+      dockerfile: TelegramBot/Dockerfile 
     container_name: multiagent_bot_app
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -32,6 +34,26 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: TelegramBotScheduler/Dockerfile
+    container_name: multiagent_bot_scheduler
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      TZ: ${TIME_ZONE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      bot:
+        condition: service_started
+    restart: unless-stopped
+    command: ["sh", "TelegramBotScheduler/start.sh"]
 
 volumes:
   postgres_data:
