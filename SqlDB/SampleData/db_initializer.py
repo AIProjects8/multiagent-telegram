@@ -105,23 +105,39 @@ def init_scheduler(db: Session):
         print("Weather agent not found")
         return
     
-    existing_scheduler = db.query(Scheduler).filter(
+    # Delete existing scheduler entries for this user and agent
+    existing_schedulers = db.query(Scheduler).filter(
         Scheduler.user_id == user.id,
         Scheduler.agent_id == weather_agent.id
-    ).first()
+    ).all()
     
-    if existing_scheduler:
-        print("Scheduler already exists for this user and agent")
-        return
+    for scheduler in existing_schedulers:
+        db.delete(scheduler)
     
-    scheduler = Scheduler(
+    if existing_schedulers:
+        print(f"Deleted {len(existing_schedulers)} existing scheduler entries")
+    
+    # Create morning scheduler (07:00)
+    morning_scheduler = Scheduler(
         user_id=user.id,
         agent_id=weather_agent.id,
-        time=time(9, 0),
-        prompt="Agent pogoda. Prognoza pogody na dziś",
+        time=time(7, 0),
+        prompt="Agent pogoda. Prognoza pogody.",
+        message_type="text"
+    )
+    
+    # Create afternoon scheduler (15:00)
+    afternoon_scheduler = Scheduler(
+        user_id=user.id,
+        agent_id=weather_agent.id,
+        time=time(15, 0),
+        prompt="Agent pogoda. Prognoza pogody.",
         message_type="voice"
     )
     
-    db.add(scheduler)
+    db.add(morning_scheduler)
+    db.add(afternoon_scheduler)
     db.commit()
-    print(f"Scheduler created successfully for {scheduler.time.strftime('%H:%M')} with ID: {scheduler.id}")
+    
+    print(f"Morning scheduler created successfully for {morning_scheduler.time.strftime('%H:%M')} with ID: {morning_scheduler.id}")
+    print(f"Afternoon scheduler created successfully for {afternoon_scheduler.time.strftime('%H:%M')} with ID: {afternoon_scheduler.id}")
