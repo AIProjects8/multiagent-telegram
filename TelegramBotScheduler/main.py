@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
 from SqlDB.database import init_db
-from TelegramBotScheduler.scheduler_service import SchedulerService
+from Modules.scheduler import SchedulerService
 
 logging.basicConfig(
     level=logging.INFO,
