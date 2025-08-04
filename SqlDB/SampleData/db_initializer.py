@@ -117,27 +117,25 @@ def init_scheduler(db: Session):
     if existing_schedulers:
         print(f"Deleted {len(existing_schedulers)} existing scheduler entries")
     
-    # Create morning scheduler (07:00)
-    morning_scheduler = Scheduler(
-        user_id=user.id,
-        agent_id=weather_agent.id,
-        time=time(7, 0),
-        prompt="Agent pogoda. Prognoza pogody.",
-        message_type="text"
-    )
+    # Define scheduler times and configurations
+    scheduler_configs = [
+        {"time": time(7, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"},
+        {"time": time(12, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"},
+        {"time": time(19, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"}
+    ]
     
-    # Create afternoon scheduler (15:00)
-    afternoon_scheduler = Scheduler(
-        user_id=user.id,
-        agent_id=weather_agent.id,
-        time=time(15, 0),
-        prompt="Agent pogoda. Prognoza pogody.",
-        message_type="voice"
-    )
+    # Create schedulers in a loop
+    for i, config in enumerate(scheduler_configs, 1):
+        scheduler = Scheduler(
+            user_id=user.id,
+            agent_id=weather_agent.id,
+            time=config["time"],
+            prompt=config["prompt"],
+            message_type=config["message_type"]
+        )
+        
+        db.add(scheduler)
+        print(f"Scheduler {i} created successfully for {scheduler.time.strftime('%H:%M')} with ID: {scheduler.id}")
     
-    db.add(morning_scheduler)
-    db.add(afternoon_scheduler)
     db.commit()
-    
-    print(f"Morning scheduler created successfully for {morning_scheduler.time.strftime('%H:%M')} with ID: {morning_scheduler.id}")
-    print(f"Afternoon scheduler created successfully for {afternoon_scheduler.time.strftime('%H:%M')} with ID: {afternoon_scheduler.id}")
+    print(f"Created {len(scheduler_configs)} schedulers successfully")

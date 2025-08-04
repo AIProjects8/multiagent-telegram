@@ -59,7 +59,7 @@ class SchedulerService:
         try:
             user_id_str = str(scheduler_config.user_id)
             agent_id_str = str(scheduler_config.agent_id)
-            job_id = f"scheduler_{user_id_str}_{agent_id_str}"
+            job_id = str(scheduler_config.id)
             
             self.logger.info(f"Scheduling message for user {user_id_str} and agent {agent_id_str} at {scheduler_config.time}")
             
@@ -67,7 +67,7 @@ class SchedulerService:
                 func=self._send_scheduled_message,
                 trigger=CronTrigger(hour=scheduler_config.time.hour, minute=scheduler_config.time.minute),
                 id=job_id,
-                name=f'Scheduled message for user {user_id_str} and agent {agent_id_str}',
+                name=f'Scheduled message for user {user_id_str} and agent {agent_id_str} at {scheduler_config.time}',
                 replace_existing=True,
                 args=[user_id_str, scheduler_config.prompt, scheduler_config.message_type]
             )

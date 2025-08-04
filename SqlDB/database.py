@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session
-from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 from .models import Base
