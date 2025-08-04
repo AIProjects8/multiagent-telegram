@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
 from SqlDB.database import init_db
-from Modules.scheduler import SchedulerService
+from Modules.Scheduler.scheduler import SchedulerService
 
 logging.basicConfig(
     level=logging.INFO,
