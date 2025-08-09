@@ -3,7 +3,6 @@ from datetime import datetime
 import pytz
 import requests
 from langchain_openai import ChatOpenAI
-from langchain.tools import tool
 from langchain.schema import HumanMessage, SystemMessage
 from Agents.agent_base import AgentBase
 from Agents.WeatherAgent.tools import get_weather
@@ -154,7 +153,7 @@ class WeatherAgent(AgentBase):
         cloudy_hours = []
         clear_hours = []
         
-        for i, hour_data in enumerate(hourly_forecast):
+        for hour_data in enumerate(hourly_forecast):
             dt_timestamp = hour_data.get("dt", 0)
             dt_utc = datetime.fromtimestamp(dt_timestamp, tz=pytz.UTC)
             poland_tz = pytz.timezone('Europe/Warsaw')

@@ -56,6 +56,26 @@ def init_default_agent(db: Session):
     else:
         print("Default agent already exists")
 
+def init_time_agent(db: Session):
+    existing_agent = db.query(Agent).filter(Agent.name == 'time').first()
+    
+    if not existing_agent:
+        time_config = {
+            "temperature": 0.7
+        }
+        
+        time_agent = Agent(
+            name='time',
+            keywords='czas,zegarek',
+            configuration=time_config
+        )
+        
+        db.add(time_agent)
+        db.commit()
+        print("Time agent created successfully")
+    else:
+        print("Time agent already exists")
+
 def init_agent_item(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()
     if not user:
@@ -79,8 +99,7 @@ def init_agent_item(db: Session):
     questionnaire_answers = {
         "city_name": "Katowice",
         "city_lat": 50.2644,
-        "city_lon": 19.0232,
-        "scheduler_active": True
+        "city_lon": 19.0232
     }
     
     agent_item = AgentItem(
@@ -93,6 +112,43 @@ def init_agent_item(db: Session):
     db.add(agent_item)
     db.commit()
     print(f"Agent item created successfully with ID: {agent_item.id}")
+
+def init_time_agent_item(db: Session):
+    user = db.query(User).filter(User.telegram_id == 8133073522).first()
+    if not user:
+        print("User with telegram_id 8133073522 not found")
+        return
+    
+    time_agent = db.query(Agent).filter(Agent.name == 'time').first()
+    if not time_agent:
+        print("Time agent not found")
+        return
+    
+    existing_item = db.query(AgentItem).filter(
+        AgentItem.user_id == user.id,
+        AgentItem.agent_id == time_agent.id
+    ).first()
+    
+    if existing_item:
+        print("Time agent item already exists for this user and agent")
+        return
+    
+    questionnaire_answers = {
+        "city_name": "Katowice",
+        "city_lat": 50.2644,
+        "city_lon": 19.0232
+    }
+    
+    agent_item = AgentItem(
+        user_id=user.id,
+        agent_id=time_agent.id,
+        questionnaire_answers=questionnaire_answers,
+        questionnaire_completed=True
+    )
+    
+    db.add(agent_item)
+    db.commit()
+    print(f"Time agent item created successfully with ID: {agent_item.id}")
 
 def init_scheduler(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()

@@ -19,3 +19,4 @@ class AgentBase(ABC):
     def name(self) -> str:
         """Return the agent name"""
         pass
+
