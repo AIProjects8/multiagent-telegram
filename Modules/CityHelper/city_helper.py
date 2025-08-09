@@ -93,7 +93,7 @@ class CityHelper:
             
             if data and len(data) > 0:
                 location = data[0]
-                return (location['name'], location['lat'], location['lon'])
+                return (location['lat'], location['lon'])
             else:
                 self.logger.warning(f"No coordinates found for city: {city_name}")
                 return None

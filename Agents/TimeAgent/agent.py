@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from config import Config
 from Agents.agent_base import AgentBase
-from Modules.CityHelper import CityHelper
+
 from timezonefinder import TimezoneFinder
 import pytz
 
@@ -26,8 +26,7 @@ class TimeAgent(AgentBase):
             openai_api_key=config.openai_api_key
         )
         
-        # Initialize city helper with the same temperature
-        self.city_helper = CityHelper(temperature=temperature)
+
         
     
     @property
@@ -36,7 +35,13 @@ class TimeAgent(AgentBase):
         
     def ask(self, message: str) -> str:
         # Get city coordinates once for the entire request
-        self.current_city_name, self.current_city_lat, self.current_city_lon = self._get_city_coordinates(message)
+        try:
+            city_info = self.get_city_info(message)
+            self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
+        except ValueError as e:
+            return f"Configuration error: {str(e)}"
+        except Exception as e:
+            return f"Error getting city information: {str(e)}"
         
         # Use LangChain to determine what the user is asking for
         query_type = self._determine_query_type(message)
@@ -136,12 +141,6 @@ class TimeAgent(AgentBase):
         city_time = self._get_time_for_location(self.current_city_lat, self.current_city_lon)
         formatted_time = city_time.strftime("%H:%M")
         
-        # Check if user specified a city in their message
-        if message:
-            city_from_message = self.city_helper.extract_city_from_message(message)
-            if city_from_message:
-                return f"The time in {self.current_city_name} is {formatted_time}."
-        
         # Default response for general time queries
         return formatted_time
     
@@ -172,38 +171,4 @@ class TimeAgent(AgentBase):
             # Fallback to UTC
             return datetime.now(UTC)
     
-    def _get_city_coordinates(self, message: str = None) -> tuple:
-        """Get city name and coordinates from message or agent configuration"""
-        # First, try to extract city from message
-        if message:
-            city_name = self.city_helper.extract_city_from_message(message)
-            if city_name:
-                # Normalize city name for geocoding
-                normalized_city = self.city_helper.normalize_city_name(city_name)
-                coordinates = self.city_helper.get_coordinates_from_geocoding(normalized_city)
-                if coordinates:
-                    return coordinates
-        
-        # If no city in message, get from agent item questionnaire answers
-        return self._get_city_from_configuration()
-    
-    def _get_city_from_configuration(self) -> tuple:
-        """Get city coordinates from questionnaire answers - must exist"""
-        if not hasattr(self, 'questionnaire_answers') or not self.questionnaire_answers:
-            raise ValueError("Questionnaire answers not found - city configuration is required")
-        
-        city_name = self.questionnaire_answers.get('city_name')
-        city_lat = self.questionnaire_answers.get('city_lat')
-        city_lon = self.questionnaire_answers.get('city_lon')
-        
-        if city_name and city_lat and city_lon:
-            return (city_name, float(city_lat), float(city_lon))
-        elif city_name:
-            # City name exists but no coordinates, use geocoding
-            coordinates = self.city_helper.get_coordinates_from_geocoding(city_name)
-            if coordinates:
-                return coordinates
-            else:
-                raise ValueError(f"Could not find coordinates for city: {city_name}")
-        else:
-            raise ValueError("City name not found in questionnaire answers")
+
