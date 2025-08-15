@@ -1,15 +1,15 @@
 from typing import Dict, Any
 from datetime import datetime
 import pytz
-from Agents.WeatherAgent.constants import day_names, month_names
+from Modules.TranslationTools.PL.constants import day_names
 from suntime import Sun
 
 def format_weather_response(weather_data: Dict[str, Any], lat: float, lon: float, city_name: str) -> str:
     if "error" in weather_data:
-        return f"Błąd: {weather_data['error']}"
+        return f"Error: {weather_data['error']}"
     
     if "hourly" not in weather_data or not weather_data["hourly"]:
-        return "Brak dostępnych danych pogodowych."
+        return "No weather data available."
     
     hourly_forecast = weather_data["hourly"][:24]
     
@@ -21,15 +21,17 @@ def format_weather_response(weather_data: Dict[str, Any], lat: float, lon: float
 
     day_name = day_names[now.weekday()]
     day = now.day
+    month = now.month
+    year = now.year
 
-    month_name = month_names[now.month]
+
     
-    response = f"Prognoza pogody dla miejscowości {city_name} na {day_name} {day} {month_name}. "
+    response = f"Weather forecast for {city_name} on {day_name} {day:02d}.{month:02d}.{year}. "
     
     if min_temp is not None and max_temp is not None:
         min_temp_rounded = round(min_temp)
         max_temp_rounded = round(max_temp)
-        response += f"Temperatura będzie się wahać od {min_temp_rounded} do {max_temp_rounded} stopni Celsjusza. "
+        response += f"Temperature will range from {min_temp_rounded} to {max_temp_rounded} degrees Celsius. "
     
     rain_hours = []
     snow_hours = []
@@ -70,30 +72,30 @@ def format_weather_response(weather_data: Dict[str, Any], lat: float, lon: float
     
     if rain_hours:
         rain_times = format_hour_ranges(rain_hours)
-        response += f"Opady deszczu przewidywane są {rain_times}. "
+        response += f"Rain is expected {rain_times}. "
     
     if snow_hours:
         snow_times = format_hour_ranges(snow_hours)
-        response += f"Śnieg może padać {snow_times}. "
+        response += f"Snow may fall {snow_times}. "
     
     if fog_hours:
         fog_times = format_hour_ranges(fog_hours)
-        response += f"Mgła może wystąpić {fog_times}. "
+        response += f"Fog may occur {fog_times}. "
     
     if strong_wind_hours:
         wind_times = format_hour_ranges(strong_wind_hours)
-        response += f"Silny wiatr przewidywany jest {wind_times}. "
+        response += f"Strong wind is expected {wind_times}. "
     
     if cloudy_hours:
         cloudy_times = format_hour_ranges(cloudy_hours)
-        response += f"Zachmurzenie duże {cloudy_times}. "
+        response += f"Heavy cloud cover {cloudy_times}. "
     
     if clear_hours:
         clear_times = format_hour_ranges(clear_hours)
-        response += f"Bezchmurne niebo {clear_times}. "
+        response += f"Clear sky {clear_times}. "
     
     if not any([rain_hours, snow_hours]):
-        response += "Nie przewiduje się opadów. "
+        response += "No precipitation is expected. "
     
     return response
 
@@ -105,7 +107,7 @@ def format_hour_ranges(hours: list) -> str:
         return f"{hour:02d}:00"
     
     if len(hours) == 1:
-        return f"o godzinie {format_hour(hours[0])}"
+        return f"at {format_hour(hours[0])}"
     
     ranges = []
     start = hours[0]
@@ -116,19 +118,19 @@ def format_hour_ranges(hours: list) -> str:
             end = hours[i]
         else:
             if start == end:
-                ranges.append(f"o godzinie {format_hour(start)}")
+                ranges.append(f"at {format_hour(start)}")
             else:
-                ranges.append(f"od {format_hour(start)} do {format_hour(end)}")
+                ranges.append(f"from {format_hour(start)} to {format_hour(end)}")
             start = end = hours[i]
     
     if start == end:
-        ranges.append(f"o godzinie {format_hour(start)}")
+        ranges.append(f"at {format_hour(start)}")
     else:
-        ranges.append(f"od {format_hour(start)} do {format_hour(end)}")
+        ranges.append(f"from {format_hour(start)} to {format_hour(end)}")
     
     if len(ranges) == 1:
         return ranges[0]
     elif len(ranges) == 2:
-        return f"{ranges[0]} i {ranges[1]}"
+        return f"{ranges[0]} and {ranges[1]}"
     else:
-        return f"{', '.join(ranges[:-1])} i {ranges[-1]}"
+        return f"{', '.join(ranges[:-1])} and {ranges[-1]}"

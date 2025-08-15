@@ -23,16 +23,16 @@ class WeatherAgent(AgentBase):
             city_name, lat, lon = self.get_city_info(message)
             
             if lat is None or lon is None:
-                return "Nie mogę podać prognozy pogody bez znajomości nazwy miasta. Proszę podać nazwę miasta lub skonfiguruj domyślne miasto w ustawieniach."
+                return "I can't provide a weather forecast without knowing the city name. Please provide the city name or configure the default city in the settings."
             
             weather_data = get_weather(lat, lon)
             response = format_weather_response(weather_data, lat, lon, city_name)
             return response
             
         except ValueError as e:
-            return f"Błąd konfiguracji: {str(e)}"
+            return f"Configuration error: {str(e)}"
         except Exception as e:
-            return f"Przepraszam, wystąpił błąd podczas pobierania prognozy pogody: {str(e)}"
+            return f"Sorry, an error occurred while fetching the weather forecast: {str(e)}"
     
     @property
     def name(self) -> str:
