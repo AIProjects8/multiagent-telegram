@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 from .models import Base
-from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_default_agent, init_time_agent, init_time_agent_item, init_scheduler
+from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_default_agent, init_time_agent, init_time_agent_item, init_scheduler, init_configuration_agent
 
 load_dotenv()
 
@@ -52,6 +52,7 @@ def init_db():
         init_agent_item(db)
         init_time_agent_item(db)
         init_scheduler(db)
+        init_configuration_agent(db)
     finally:
         db.close()
 

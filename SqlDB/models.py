@@ -14,6 +14,7 @@ class User(Base):
     telegram_id = Column(BigInteger, unique=True, nullable=False)
     chat_id = Column(BigInteger, unique=True, nullable=False)
     name = Column(String(255))
+    configuration = Column(JSON, nullable=True)
 
 
 class Agent(Base):

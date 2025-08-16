@@ -40,7 +40,7 @@ class TimeAgent(AgentBase):
 
     def _get_response(self, message: Message) -> str:
         try:
-            city_info = self.get_city_info(message.text)
+            city_info = self.get_city_info(message)
             self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
         except ValueError as e:
             return f"Configuration error: {str(e)}"

@@ -7,6 +7,7 @@ from SqlDB.user_cache import UserCache
 from .agent_factory import AgentFactory
 from Agents.agent_base import AgentBase
 from Modules.MessageProcessor.message_processor import Message
+from Modules.UserManager.user_manager import UserManager
 
 class AgentRooter:
     _instance = None
@@ -15,6 +16,7 @@ class AgentRooter:
     _app_keyword = None
     current_agents = {}
     _agent_instances = {}
+    _user_manager = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -30,6 +32,7 @@ class AgentRooter:
         self._agent_map = {}
         self._default_agent = None
         self._agent_instances = {}
+        self._user_manager = UserManager()
 
     def _load_agents(self):
         session = Session(engine)
@@ -99,39 +102,63 @@ class AgentRooter:
         self._agent_instances[instance_key] = agent_instance
         return agent_instance
 
-    def find_agent_in_message(self, message: str):
-        msg = message.lower()
+    def find_agent_in_message(self, message: Message):
+        msg = message.text.lower()
         for kw, agent in self._agent_map.items():
             search = f"{self._app_keyword} {kw}"
             if search in msg:
                 return agent
         return None
 
-    def get_current_agent(self, user_id: str):
+    def _get_current_agent(self, user_id: str):
         if user_id not in self.current_agents:
+            # Set default agent initially
             self.current_agents[user_id] = self._default_agent
         return self.current_agents[user_id]
     
-    def get_current_agent_instance(self, user_id: str) -> AgentBase:
-        current_agent = self.get_current_agent(user_id)
+    def _user_has_configuration(self, user_id: str) -> bool:
+        """Check if user has completed configuration using UserManager"""
+        return self._user_manager.check_user_configuration(user_id)
+    
+    def _get_configuration_agent(self):
+        """Get the configuration agent object"""
+        for agent in self._agents:
+            if agent['name'] == 'configuration':
+                return agent
+        return None
+    
+    def _get_current_agent_instance(self, user_id: str) -> AgentBase:
+        current_agent = self._get_current_agent(user_id)
         if not current_agent:
             return None
             
         return self._get_agent_instance(user_id, current_agent['name'])
     
-    def ask_current_agent(self, user_id: str, message: Message) -> str:
-        agent_instance = self.get_current_agent_instance(user_id)
+    def ask_current_agent(self, message: Message) -> str:
+        agent_instance = self._get_current_agent_instance(message.user_id)
         if agent_instance:
             return agent_instance.ask(message)
         return "No agent available to respond"
 
-    def switch(self, message: str, user_id: str) -> bool:
+    def switch(self, message: Message) -> bool:
+        # First, check if user has configuration - if not, force to ConfigurationAgent
+        if not self._user_has_configuration(message.user_id):
+            configuration_agent = self._get_configuration_agent()
+            if configuration_agent and self.current_agents.get(message.user_id) != configuration_agent:
+                self.current_agents[message.user_id] = configuration_agent
+                print(f"User {message.user_id} has no configuration, forced to ConfigurationAgent")
+                return True
+            return False
+        
+        # If user has configuration, check for explicit agent switching
         agent = self.find_agent_in_message(message)
-        temp_current_agent = self.get_current_agent(user_id)
+        temp_current_agent = self._get_current_agent(message.user_id)
+        
         if agent and (temp_current_agent is None or agent['id'] != temp_current_agent['id']):
-            self.current_agents[user_id] = agent
-            print(f"Switched to agent: {agent['id']} for user: {user_id}")
+            self.current_agents[message.user_id] = agent
+            print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
             return True
+        
         return False
 
 def get_agent_rooter():

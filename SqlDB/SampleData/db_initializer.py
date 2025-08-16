@@ -2,6 +2,24 @@ from sqlalchemy.orm import Session
 from datetime import time
 from SqlDB.models import Agent, User, AgentItem, Scheduler
 
+def init_configuration_agent(db: Session):
+    existing_agent = db.query(Agent).filter(Agent.name == 'configuration').first()
+    
+    if not existing_agent:
+        agent = Agent(
+            name='configuration',
+            keywords='konfiguracja,konfig,config',
+            configuration={
+                'temperature': 0.1
+            }
+        )
+        
+        db.add(agent)
+        db.commit()
+        print("Configuration agent created successfully")
+    else:
+        print("Configuration agent already exists")
+
 def init_user(db: Session):
     existing_user = db.query(User).filter(User.telegram_id == 8133073522).first()
     
@@ -9,7 +27,8 @@ def init_user(db: Session):
         user = User(
             telegram_id=8133073522,
             name="Test User",
-            chat_id=8133073522
+            chat_id=8133073522,
+            configuration=None  # Will be set by ConfigurationAgent
         )
         
         db.add(user)
@@ -42,7 +61,9 @@ def init_default_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'default').first()
     
     if not existing_agent:
-        config = {}
+        config = {
+            "temperature": 0.7
+        }
         
         agent = Agent(
             name='default',
@@ -175,9 +196,7 @@ def init_scheduler(db: Session):
     
     # Define scheduler times and configurations
     scheduler_configs = [
-        {"time": time(7, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"},
-        {"time": time(12, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"},
-        {"time": time(19, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"}
+        {"time": time(7, 0), "prompt": "Agent pogoda. Prognoza pogody.", "message_type": "voice"}
     ]
     
     # Create schedulers in a loop

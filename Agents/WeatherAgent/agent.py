@@ -29,7 +29,7 @@ class WeatherAgent(AgentBase):
 
     def _get_response(self, message: Message) -> str:
         try:
-            city_name, lat, lon = self.get_city_info(message.text)
+            city_name, lat, lon = self.get_city_info(message)
             
             if lat is None or lon is None:
                 return "I can't provide a weather forecast without knowing the city name. Please provide the city name or configure the default city in the settings."

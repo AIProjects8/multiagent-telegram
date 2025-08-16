@@ -5,7 +5,6 @@ import logging
 import requests
 
 class CityHelper:
-    """Helper class for city-related operations"""
     
     def __init__(self, temperature: float = 0.7):
         config = Config.from_env()
@@ -18,7 +17,6 @@ class CityHelper:
         self.logger = logging.getLogger(__name__)
     
     def extract_city_from_message(self, message: str) -> str:
-        """Extract city name from user message using LLM"""
         system_prompt = """You are a geography assistant that extracts city names from user messages.
         Analyze the user's message and extract the city name if they are asking about a specific city.
         
@@ -47,7 +45,6 @@ class CityHelper:
             return None
     
     def normalize_city_name(self, city_name: str) -> str:
-        """Normalize city name to its primary form for geocoding"""
         system_prompt = """You are a geography expert. Normalize the given city name to its primary, standard form suitable for geocoding.
         
         Rules:
@@ -78,7 +75,6 @@ class CityHelper:
             return city_name
     
     def get_coordinates_from_geocoding(self, city_name: str) -> tuple:
-        """Get coordinates from OpenWeatherMap geocoding API"""
         url = "http://api.openweathermap.org/geo/1.0/direct"
         params = {
             "q": city_name,

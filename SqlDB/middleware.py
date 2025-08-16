@@ -61,7 +61,6 @@ def _handle_user_from_database(telegram_id: int, chat_id: int, first_name: str, 
         user_updated = True
     
     if user_updated:
-
         try:
             db.add(user)
             db.commit()
@@ -98,6 +97,9 @@ def update_db_user(func):
             if not user:
                 print(f"Creating new user for telegram_id: {telegram_id}")
                 user = create_user(db, telegram_id, chat_id, first_name)
+                user.configuration = None  # New users start with NULL configuration
+                db.commit()
+                db.refresh(user)
             else:
                 print(f"User {telegram_id} found in database")
                 user = _handle_user_from_database(telegram_id, chat_id, first_name, db, user)

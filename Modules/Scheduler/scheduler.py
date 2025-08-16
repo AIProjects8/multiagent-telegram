@@ -11,6 +11,7 @@ from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 from Modules.MessageProcessor.message_processor import MessageProcessor
 from Modules.SpeechHelper.speech_helper import SpeechHelper
 from config import Config
+from Modules.MessageProcessor.message_processor import Message
 
 class SchedulerService:
     def __init__(self, config: Config):
@@ -87,14 +88,17 @@ class SchedulerService:
                     self.logger.warning(f"User with id {user_id} not found")
                     return
                 
+                user_language = 'en'
+                if user.configuration and user.configuration.get('language'):
+                    user_language = user.configuration['language']
+                
                 text = MessageProcessor.clean_message(prompt)
                 agent_rooter = get_agent_rooter()
-                agent_rooter.switch(text, user_id)
                 
-                # Create Message object with default language 'en' for scheduled messages
-                from Modules.MessageProcessor.message_processor import Message
-                message_obj = Message(text=text, language='pl')
-                response = agent_rooter.ask_current_agent(user_id, message_obj)
+                message_obj = Message(text=text, language=user_language, ui_language='en', user_id=user_id)
+                
+                agent_rooter.switch(message_obj)
+                response = agent_rooter.ask_current_agent(message_obj)
                 
                 if message_type == 'voice':
                     await self._send_voice_message(user.chat_id, response, user.telegram_id)

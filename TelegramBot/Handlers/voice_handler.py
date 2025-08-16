@@ -8,6 +8,7 @@ from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 from SqlDB.user_cache import UserCache
 from SqlDB.middleware import update_db_user
 from Modules.MessageProcessor.message_processor import MessageProcessor, Message
+from Modules.UserManager.user_manager import UserManager
 
 @restricted
 @update_db_user
@@ -19,16 +20,22 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await speech_manager.download_voice_file(audio_file.file_path, audio_path)
     transcribed_text = await speech_manager.transcribe_voice(audio_path)
     
-    # Get user's language from Telegram
-    user_language = update.effective_user.language_code or 'en'
-    print(f"Voice message user language detected: {user_language}")
-    
-    # Create Message object with transcribed text and language
-    message_obj = MessageProcessor.create_message(transcribed_text, user_language)
+    ui_language = update.effective_user.language_code or 'en'
     
     telegram_user_id: int = update.message.from_user.id
-    user_id = UserCache().get_user_id(telegram_user_id)
-    switched = get_agent_rooter().switch(message_obj.text, user_id)
+    user_cache = UserCache()
+    user_id = user_cache.get_user_id(telegram_user_id)
+    
+    user_manager = UserManager()
+    try:
+        user_language = user_manager.get_user_language(user_id)
+        print(f"Voice message user configured language: {user_language}")
+    except ValueError:
+        user_language = 'en'
+    
+    message_obj = MessageProcessor.create_message(transcribed_text, user_language, ui_language, user_id)
+    
+    switched = get_agent_rooter().switch(message_obj)
     
     if switched:
         await update.message.reply_text(f"Switched to agent: {get_agent_rooter().current_agents[user_id]['name']}")
@@ -42,8 +49,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(transcribed_text)
         return
     
-    # Get response from agent (translation happens inside the agent)
-    response = get_agent_rooter().ask_current_agent(user_id, message_obj)
+    response = get_agent_rooter().ask_current_agent(message_obj)
     
     response_audio_path = f'./audio/response_{update.message.message_id}.mp3'
     await speech_manager.text_to_speech(response, response_audio_path)

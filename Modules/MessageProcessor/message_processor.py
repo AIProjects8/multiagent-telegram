@@ -5,6 +5,8 @@ from dataclasses import dataclass
 class Message:
     text: str
     language: str
+    ui_language: str
+    user_id: str
 
 class MessageProcessor:
     @staticmethod
@@ -21,9 +23,9 @@ class MessageProcessor:
         return True
     
     @staticmethod
-    def create_message(text: str, language: str) -> Message:
+    def create_message(text: str, language: str, ui_language: str, user_id: str) -> Message:
         """
-        Create a Message object with cleaned text and language code.
+        Create a Message object with cleaned text, language, UI language, and user_id.
         """
         cleaned_text = MessageProcessor.clean_message(text)
-        return Message(text=cleaned_text, language=language) 
+        return Message(text=cleaned_text, language=language, ui_language=ui_language, user_id=user_id) 
