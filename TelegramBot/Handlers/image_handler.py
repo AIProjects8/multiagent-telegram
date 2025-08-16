@@ -5,6 +5,7 @@ from TelegramBot.Tools.auth_decorator import restricted
 from SqlDB.middleware import update_db_user
 from AgentsCore.Rooter.agent_rooter import get_agent_rooter
 from SqlDB.user_cache import UserCache
+from Modules.MessageProcessor.message_processor import MessageProcessor, Message
 
 @restricted
 @update_db_user
@@ -17,10 +18,16 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     os.makedirs('./images', exist_ok=True)
     await file.download_to_drive(image_path)
     
+    # Get user's language from Telegram
+    user_language = update.effective_user.language_code or 'en'
+    
+    # Create Message object with text and language
+    message_obj = MessageProcessor.create_message(text, user_language)
+    
     # Handle image processing
     telegram_user_id: int = update.message.from_user.id
     user_id = UserCache().get_user_id(telegram_user_id)
-    get_agent_rooter().switch(text, user_id)
+    get_agent_rooter().switch(message_obj.text, user_id)
 
     await update.message.reply_text("Image processed")
     

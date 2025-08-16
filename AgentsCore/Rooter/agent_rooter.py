@@ -6,6 +6,7 @@ from config import Config
 from SqlDB.user_cache import UserCache
 from .agent_factory import AgentFactory
 from Agents.agent_base import AgentBase
+from Modules.MessageProcessor.message_processor import Message
 
 class AgentRooter:
     _instance = None
@@ -118,7 +119,7 @@ class AgentRooter:
             
         return self._get_agent_instance(user_id, current_agent['name'])
     
-    def ask_current_agent(self, user_id: str, message: str) -> str:
+    def ask_current_agent(self, user_id: str, message: Message) -> str:
         agent_instance = self.get_current_agent_instance(user_id)
         if agent_instance:
             return agent_instance.ask(message)

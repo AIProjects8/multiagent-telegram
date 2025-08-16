@@ -2,7 +2,7 @@ from Agents.agent_base import AgentBase
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from config import Config
-import os
+from Modules.MessageProcessor.message_processor import Message
 
 class DefaultAgent(AgentBase):
     def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
@@ -15,17 +15,19 @@ class DefaultAgent(AgentBase):
             max_tokens=1000
         )
     
-    def ask(self, message: str) -> str:
-        system_prompt = f"You are a helpful AI assistant responding to user. Provide clear, concise, and helpful responses. Always respond in Polish."
+    def ask(self, message: Message) -> str:
+        system_prompt = "You are a helpful AI assistant responding to user. Provide clear, concise, and helpful responses. Respond in the same language as the user's message."
         
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=message)
+            HumanMessage(content=message.text)
         ]
         
         try:
             response = self.llm.invoke(messages)
+
             return response.content
+                
         except Exception as e:
             return f"Sorry, I encountered an error: {str(e)}"
     

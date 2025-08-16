@@ -90,7 +90,11 @@ class SchedulerService:
                 text = MessageProcessor.clean_message(prompt)
                 agent_rooter = get_agent_rooter()
                 agent_rooter.switch(text, user_id)
-                response = agent_rooter.ask_current_agent(user_id, text)
+                
+                # Create Message object with default language 'en' for scheduled messages
+                from Modules.MessageProcessor.message_processor import Message
+                message_obj = Message(text=text, language='pl')
+                response = agent_rooter.ask_current_agent(user_id, message_obj)
                 
                 if message_type == 'voice':
                     await self._send_voice_message(user.chat_id, response, user.telegram_id)

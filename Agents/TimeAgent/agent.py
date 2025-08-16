@@ -4,6 +4,8 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from config import Config
 from Agents.agent_base import AgentBase
+from Modules.MessageProcessor.message_processor import Message
+from Modules.TranslationTools.translator import Translator
 
 from timezonefinder import TimezoneFinder
 import pytz
@@ -26,17 +28,19 @@ class TimeAgent(AgentBase):
             openai_api_key=config.openai_api_key
         )
         
-
+        self.translator = Translator()
         
     
     @property
     def name(self) -> str:
         return "time"
         
-    def ask(self, message: str) -> str:
-        # Get city coordinates once for the entire request
+    def ask(self, message: Message) -> str:
+        return self.translator.translate_to_polish(self._get_response(message))
+
+    def _get_response(self, message: Message) -> str:
         try:
-            city_info = self.get_city_info(message)
+            city_info = self.get_city_info(message.text)
             self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
         except ValueError as e:
             return f"Configuration error: {str(e)}"
@@ -44,14 +48,16 @@ class TimeAgent(AgentBase):
             return f"Error getting city information: {str(e)}"
         
         # Use LangChain to determine what the user is asking for
-        query_type = self._determine_query_type(message)
+        query_type = self._determine_query_type(message.text)
         
         if query_type == "sunrise":
             return self._handle_sunrise_query()
         elif query_type == "sunset":
             return self._handle_sunset_query()
+        elif query_type == "time":
+            return self._get_current_time()
         else:
-            return self._get_current_time(message)
+            return "I'm sorry, I don't understand your request. Please try again."
     
     def _determine_query_type(self, message: str) -> str:
         system_prompt = f"""You are a time agent that helps users get information about time including:
@@ -89,14 +95,8 @@ class TimeAgent(AgentBase):
             response = self.llm.invoke(messages)
             return response.content.strip().lower()
         except Exception as e:
-            # Fallback to simple keyword matching if LLM fails
-            message_lower = message.lower()
-            if "sunrise" in message_lower or "wschód" in message_lower or "wschod" in message_lower:
-                return "sunrise"
-            elif "sunset" in message_lower or "zachód" in message_lower or "zachod" in message_lower:
-                return "sunset"
-            else:
-                return "time"
+            print("Error determining query type: ", e)
+            return "An error occurred while determining the query type."
     
     def _handle_sunrise_query(self) -> str:
         try:
@@ -136,7 +136,7 @@ class TimeAgent(AgentBase):
         except Exception as e:
             return f"Error getting sunset information: {str(e)}"
     
-    def _get_current_time(self, message: str = None) -> str:
+    def _get_current_time(self) -> str:
         # Get the actual time for the city based on its coordinates
         city_time = self._get_time_for_location(self.current_city_lat, self.current_city_lon)
         formatted_time = city_time.strftime("%H:%M")

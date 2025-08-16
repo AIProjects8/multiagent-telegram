@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
+from Modules.MessageProcessor.message_processor import Message
 
 class AgentBase(ABC):
     """Base interface for all agents in the system"""
@@ -10,7 +11,7 @@ class AgentBase(ABC):
         self.questionnaire_answers = questionnaire_answers or {}
     
     @abstractmethod
-    def ask(self, message: str) -> str:
+    def ask(self, message: Message) -> str:
         """Process a user message and return a response"""
         pass
     
