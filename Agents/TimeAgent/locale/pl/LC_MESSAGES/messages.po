@@ -1,0 +1,45 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TimeAgent 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Configuration error: {error}"
+msgstr "Błąd konfiguracji: {error}"
+
+msgid "Error getting city information: {error}"
+msgstr "Błąd podczas pobierania informacji o mieście: {error}"
+
+msgid "I'm sorry, I don't understand your request. Please try again."
+msgstr "Przepraszam, nie rozumiem Twojego żądania. Spróbuj ponownie."
+
+msgid "The sunrise in {city} will be tomorrow at {time}."
+msgstr "Wschód słońca w {city} będzie jutro o {time}."
+
+msgid "The sunrise in {city} will be at {time}."
+msgstr "Wschód słońca w {city} będzie o {time}."
+
+msgid "Error: {error}"
+msgstr "Błąd: {error}"
+
+msgid "Error getting sunrise information: {error}"
+msgstr "Błąd podczas pobierania informacji o wschodzie słońca: {error}"
+
+msgid "The sunset in {city} will be tomorrow at {time}."
+msgstr "Zachód słońca w {city} będzie jutro o {time}."
+
+msgid "The sunset in {city} will be at {time}."
+msgstr "Zachód słońca w {city} będzie o {time}."
+
+msgid "Error getting sunset information: {error}"
+msgstr "Błąd podczas pobierania informacji o zachodzie słońca: {error}"
+
+msgid "An error occurred while determining the query type."
+msgstr "Wystąpił błąd podczas określania typu zapytania."

@@ -24,7 +24,7 @@ class ConfigurationAgent(AgentBase):
     def ask(self, message: Message) -> str:
         # Check if user has completed configuration
         if self._is_configuration_complete():
-            return "Configuration is already complete. You can now use other agents."
+            return self._("Configuration is already complete. You can now use other agents.")
         
         # Get current step
         current_step = self._get_current_step()
@@ -34,7 +34,7 @@ class ConfigurationAgent(AgentBase):
         elif current_step == 'city':
             return self._ask_city(message)
         else:
-            return "Configuration error. Please contact support."
+            return self._("Configuration error. Please contact support.")
     
     def _is_configuration_complete(self) -> bool:
         """Check if user has completed all configuration steps"""
@@ -51,7 +51,7 @@ class ConfigurationAgent(AgentBase):
     def _ask_language(self, message: Message) -> str:
         """Ask user for their language preference"""
         if self.questionnaire_answers.get('language'):
-            return "Language is already set. Moving to next step."
+            return self._("Language is already set. Moving to next step.")
         
         # Check if user provided language in this message
         if message.text and len(message.text.strip()) == 2:
@@ -74,19 +74,15 @@ pl - Polski
 
 Wpisz tylko dwie litery (en lub pl):"""
         else:
-            return """What is your language? Insert two characters code:
-en - English
-pl - Polski
-
-Enter only two characters (en or pl):"""
+            return self._("What is your language? Insert two characters code:\nen - English\npl - Polski\n\nEnter only two characters (en or pl):")
     
     def _ask_city(self, message: Message) -> str:
         """Ask user for their city"""
         if not self.questionnaire_answers.get('language'):
-            return "Please set language first."
+            return self._("Please set language first.")
         
         if self.questionnaire_answers.get('city'):
-            return "City is already set. Configuration complete."
+            return self._("City is already set. Configuration complete.")
         
         # Check if user provided city in this message
         if message.text and len(message.text.strip()) > 0:
@@ -107,7 +103,7 @@ Enter only two characters (en or pl):"""
                     }
                     self.questionnaire_answers['city'] = city_obj
                     self._save_configuration()
-                    return "Configuration completed! You can now use other agents."
+                    return self._("Configuration completed! You can now use other agents.")
                 else:
                     return self._get_city_error_message(user_lang)
             except Exception as e:
@@ -116,7 +112,7 @@ Enter only two characters (en or pl):"""
         return self._get_city_question()
     
     def _get_city_question(self) -> str:
-        return "What is your city name?"
+        return self._("What is your city name?")
     
     def _get_city_error_message(self, user_lang: str) -> str:
         """Get city error message in the user's chosen language"""
@@ -130,14 +126,7 @@ Enter only two characters (en or pl):"""
 
 Spróbuj ponownie:"""
         else:
-            return """City name should be in the basic form. Examples of correct names:
-- Warszawa (not Warszawie)
-- Katowice (not Katowicach)
-- New York (not New Yorku)
-- London (not Londynie)
-- Paris (not Paryżu)
-
-Please try again:"""
+            return self._("City name should be in the basic form. Examples of correct names:\n- Warszawa (not Warszawie)\n- Katowice (not Katowicach)\n- New York (not New Yorku)\n- London (not Londynie)\n- Paris (not Paryżu)\n\nPlease try again:")
     
     def _save_configuration(self):
         """Save configuration to database via UserManager"""

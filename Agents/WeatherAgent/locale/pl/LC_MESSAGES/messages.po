@@ -1,0 +1,60 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WeatherAgent 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "I can't provide a weather forecast without knowing the city name. Please provide the city name or configure the default city in the settings."
+msgstr "Nie mogę udzielić prognozy pogody bez znajomości nazwy miasta. Podaj nazwę miasta lub skonfiguruj domyślne miasto w ustawieniach."
+
+msgid "Configuration error: {error}"
+msgstr "Błąd konfiguracji: {error}"
+
+msgid "Sorry, an error occurred while fetching the weather forecast: {error}"
+msgstr "Przepraszam, wystąpił błąd podczas pobierania prognozy pogody: {error}"
+
+msgid "Weather forecast for {city} on {day} {date}. "
+msgstr "Prognoza pogody dla miejscowości {city} na {day} {date}. "
+
+msgid "Temperature will range from {min_temp} to {max_temp} degrees Celsius. "
+msgstr "Temperatura będzie wahać się od {min_temp} do {max_temp} °C. "
+
+msgid "Rain is expected {times}. "
+msgstr "Deszcz jest oczekiwany {times}. "
+
+msgid "Snow may fall {times}. "
+msgstr "Śnieg może padać {times}. "
+
+msgid "Fog may occur {times}. "
+msgstr "Mgła może wystąpić {times}. "
+
+msgid "Strong wind is expected {times}. "
+msgstr "Silny wiatr jest oczekiwany {times}. "
+
+msgid "Heavy cloud cover {times}. "
+msgstr "Duże zachmurzenie {times}. "
+
+msgid "Clear sky {times}. "
+msgstr "Bezchmurne niebo {times}. "
+
+msgid "No precipitation is expected. "
+msgstr "Nie oczekuje się opadów. "
+
+msgid "at {hour}"
+msgstr "o {hour}"
+
+msgid "from {start_hour} to {end_hour}"
+msgstr "od {start_hour} do {end_hour}"
+
+msgid " and "
+msgstr " i "
+
+msgid "No weather data available."
+msgstr "Brak dostępnych danych pogodowych."

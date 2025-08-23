@@ -29,7 +29,7 @@ class DefaultAgent(AgentBase):
             return response.content
                 
         except Exception as e:
-            return f"Sorry, I encountered an error: {str(e)}"
+            return self._("Sorry, I encountered an error: {error}").format(error=str(e))
     
     @property
     def name(self) -> str:

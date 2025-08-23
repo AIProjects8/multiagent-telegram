@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
+import gettext
+from pathlib import Path
 from Modules.MessageProcessor.message_processor import Message
 from Modules.UserManager.user_manager import UserManager
 from Modules.CityHelper import CityHelper
@@ -13,6 +15,46 @@ class AgentBase(ABC):
         self.questionnaire_answers = questionnaire_answers or {}
         self._user_manager = UserManager()
         self._city_helper = None
+        self._translator = None
+    
+    def _get_user_language(self) -> str:
+        """Get user's preferred language from cache, defaults to 'en' if not configured"""
+        user = self._user_manager.cache.get_user_by_id(self.user_id)
+        if not user or not user.configuration or not user.configuration.get('language'):
+            return 'en'
+        return user.configuration['language']
+    
+    def _get_translator(self):
+        """Get gettext translator for the user's language"""
+        if self._translator is None:
+            user_lang = self._get_user_language()
+            
+            if user_lang == 'en':
+                self._translator = gettext.NullTranslations()
+            else:
+                try:
+                    # Transform agent name to match directory structure (e.g., "weather" -> "WeatherAgent")
+                    agent_name = self.name.capitalize() + "Agent"
+                    agent_dir = Path(__file__).parent / agent_name
+                    locale_dir = agent_dir / 'locale'
+                    
+                    if locale_dir.exists():
+                        self._translator = gettext.translation(
+                            'messages',
+                            localedir=str(locale_dir),
+                            languages=[user_lang]
+                        )
+                    else:
+                        self._translator = gettext.NullTranslations()
+                except Exception as e:
+                    print(f"Exception creating translator: {e}")
+                    self._translator = gettext.NullTranslations()
+        return self._translator
+    
+    def _(self, message: str) -> str:
+        """Translate a message using gettext"""
+        translator = self._get_translator()
+        return translator.gettext(message)
     
     @abstractmethod
     def ask(self, message: Message) -> str:

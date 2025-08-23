@@ -2,11 +2,11 @@
 day_names = [
     "poniedziałek",    # Monday
     "wtorek",          # Tuesday
-    "środa",           # Wednesday
+    "środę",           # Wednesday
     "czwartek",        # Thursday
     "piątek",          # Friday
-    "sobota",          # Saturday
-    "niedziela"        # Sunday
+    "sobotę",          # Saturday
+    "niedzielę"        # Sunday
 ]
 
 # Polish month names

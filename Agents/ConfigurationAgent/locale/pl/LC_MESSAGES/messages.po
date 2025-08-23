@@ -1,0 +1,39 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ConfigurationAgent 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Configuration is already complete. You can now use other agents."
+msgstr "Konfiguracja jest już kompletna. Możesz teraz używać innych agentów."
+
+msgid "Configuration error. Please contact support."
+msgstr "Błąd konfiguracji. Skontaktuj się z pomocą techniczną."
+
+msgid "Language is already set. Moving to next step."
+msgstr "Język jest już ustawiony. Przechodzę do następnego kroku."
+
+msgid "What is your language? Insert two characters code:\nen - English\npl - Polski\n\nEnter only two characters (en or pl):"
+msgstr "Jaki jest Twój język? Wpisz kod dwuliterowy:\nen - English\npl - Polski\n\nWpisz tylko dwie litery (en lub pl):"
+
+msgid "Please set language first."
+msgstr "Najpierw ustaw język."
+
+msgid "City is already set. Configuration complete."
+msgstr "Miasto jest już ustawione. Konfiguracja zakończona."
+
+msgid "Configuration completed! You can now use other agents."
+msgstr "Konfiguracja zakończona! Możesz teraz używać innych agentów."
+
+msgid "City name should be in the basic form. Examples of correct names:\n- Warszawa (not Warszawie)\n- Katowice (not Katowicach)\n- New York (not New Yorku)\n- London (not Londynie)\n- Paris (not Paryżu)\n\nPlease try again:"
+msgstr "Nazwa miasta powinna być w formie podstawowej. Przykłady poprawnych nazw:\n- Warszawa (nie Warszawie)\n- Katowice (nie Katowicach)\n- New York (nie New Yorku)\n- London (nie Londynie)\n- Paris (nie Paryżu)\n\nSpróbuj ponownie:"
+
+msgid "What is your city name?"
+msgstr "Jakie jest Twoje miasto?"

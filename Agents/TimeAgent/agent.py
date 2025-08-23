@@ -5,7 +5,6 @@ from langchain.schema import HumanMessage, SystemMessage
 from config import Config
 from Agents.agent_base import AgentBase
 from Modules.MessageProcessor.message_processor import Message
-from Modules.TranslationTools.translator import Translator
 
 from timezonefinder import TimezoneFinder
 import pytz
@@ -28,24 +27,22 @@ class TimeAgent(AgentBase):
             openai_api_key=config.openai_api_key
         )
         
-        self.translator = Translator()
-        
     
     @property
     def name(self) -> str:
         return "time"
         
     def ask(self, message: Message) -> str:
-        return self.translator.translate_to_polish(self._get_response(message))
+        return self._get_response(message)
 
     def _get_response(self, message: Message) -> str:
         try:
             city_info = self.get_city_info(message)
             self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
         except ValueError as e:
-            return f"Configuration error: {str(e)}"
+            return self._("Configuration error: {error}").format(error=str(e))
         except Exception as e:
-            return f"Error getting city information: {str(e)}"
+            return self._("Error getting city information: {error}").format(error=str(e))
         
         # Use LangChain to determine what the user is asking for
         query_type = self._determine_query_type(message.text)
@@ -57,7 +54,7 @@ class TimeAgent(AgentBase):
         elif query_type == "time":
             return self._get_current_time()
         else:
-            return "I'm sorry, I don't understand your request. Please try again."
+            return self._("I'm sorry, I don't understand your request. Please try again.")
     
     def _determine_query_type(self, message: str) -> str:
         system_prompt = f"""You are a time agent that helps users get information about time including:
@@ -96,7 +93,7 @@ class TimeAgent(AgentBase):
             return response.content.strip().lower()
         except Exception as e:
             print("Error determining query type: ", e)
-            return "An error occurred while determining the query type."
+            return self._("An error occurred while determining the query type.")
     
     def _handle_sunrise_query(self) -> str:
         try:
@@ -108,14 +105,14 @@ class TimeAgent(AgentBase):
                 today_passed = result["today_passed"]
                 
                 if today_passed:
-                    return f"The sunrise in {self.current_city_name} will be tomorrow at {tomorrow_time}."
+                    return self._("The sunrise in {city} will be tomorrow at {time}.").format(city=self.current_city_name, time=tomorrow_time)
                 else:
-                    return f"The sunrise in {self.current_city_name} will be at {today_time}."
+                    return self._("The sunrise in {city} will be at {time}.").format(city=self.current_city_name, time=today_time)
             else:
-                return f"Error: {result.get('error', 'Failed to get sunrise information')}"
+                return self._("Error: {error}").format(error=result.get('error', 'Failed to get sunrise information'))
                 
         except Exception as e:
-            return f"Error getting sunrise information: {str(e)}"
+            return self._("Error getting sunrise information: {error}").format(error=str(e))
     
     def _handle_sunset_query(self) -> str:
         try:
@@ -127,14 +124,14 @@ class TimeAgent(AgentBase):
                 today_passed = result["today_passed"]
                 
                 if today_passed:
-                    return f"The sunset in {self.current_city_name} will be tomorrow at {tomorrow_time}."
+                    return self._("The sunset in {city} will be tomorrow at {time}.").format(city=self.current_city_name, time=tomorrow_time)
                 else:
-                    return f"The sunset in {self.current_city_name} will be at {today_time}."
+                    return self._("The sunset in {city} will be at {time}.").format(city=self.current_city_name, time=today_time)
             else:
-                return f"Error: {result.get('error', 'Failed to get sunset information')}"
+                return self._("Error: {error}").format(error=result.get('error', 'Failed to get sunset information'))
                 
         except Exception as e:
-            return f"Error getting sunset information: {str(e)}"
+            return self._("Error getting sunset information: {error}").format(error=str(e))
     
     def _get_current_time(self) -> str:
         # Get the actual time for the city based on its coordinates
