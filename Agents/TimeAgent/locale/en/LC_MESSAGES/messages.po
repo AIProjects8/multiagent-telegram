@@ -43,3 +43,6 @@ msgstr "Error getting sunset information: {error}"
 
 msgid "An error occurred while determining the query type."
 msgstr "An error occurred while determining the query type."
+
+msgid "The time in {city} is {time}"
+msgstr "The time in {city} is {time}"

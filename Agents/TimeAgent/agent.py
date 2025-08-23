@@ -33,9 +33,6 @@ class TimeAgent(AgentBase):
         return "time"
         
     def ask(self, message: Message) -> str:
-        return self._get_response(message)
-
-    def _get_response(self, message: Message) -> str:
         try:
             city_info = self.get_city_info(message)
             self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
@@ -138,8 +135,25 @@ class TimeAgent(AgentBase):
         city_time = self._get_time_for_location(self.current_city_lat, self.current_city_lon)
         formatted_time = city_time.strftime("%H:%M")
         
-        # Default response for general time queries
-        return formatted_time
+        # Check if the city in the message matches the user's configured city
+        try:
+            user = self._user_manager.cache.get_user_by_id(self.user_id)
+            if user and user.configuration and user.configuration.get('city'):
+                user_city_name = user.configuration['city'].get('name', '').lower()
+                message_city_name = self.current_city_name.lower()
+                
+                if user_city_name == message_city_name:
+                    # Same city as user's configuration - return just time
+                    return formatted_time
+                else:
+                    # Different city - return time with city name
+                    return self._("The time in {city} is {time}").format(city=self.current_city_name, time=formatted_time)
+            else:
+                # No user configuration - return just time
+                return formatted_time
+        except Exception:
+            # Fallback - return just time
+            return formatted_time
     
     def _get_time_for_location(self, lat: float, lon: float) -> datetime:
         """Get the current time for a specific city based on its coordinates"""

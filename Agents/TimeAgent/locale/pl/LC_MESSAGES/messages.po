@@ -43,3 +43,6 @@ msgstr "Błąd podczas pobierania informacji o zachodzie słońca: {error}"
 
 msgid "An error occurred while determining the query type."
 msgstr "Wystąpił błąd podczas określania typu zapytania."
+
+msgid "The time in {city} is {time}"
+msgstr "Czas w miejscowości {city} to {time}"

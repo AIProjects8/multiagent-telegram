@@ -33,7 +33,7 @@ class AgentBase(ABC):
                 self._translator = gettext.NullTranslations()
             else:
                 try:
-                    # Transform agent name to match directory structure (e.g., "weather" -> "WeatherAgent")
+
                     agent_name = self.name.capitalize() + "Agent"
                     agent_dir = Path(__file__).parent / agent_name
                     locale_dir = agent_dir / 'locale'
