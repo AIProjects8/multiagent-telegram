@@ -33,7 +33,6 @@ class AgentBase(ABC):
                 self._translator = gettext.NullTranslations()
             else:
                 try:
-
                     agent_name = self.name.capitalize() + "Agent"
                     agent_dir = Path(__file__).parent / agent_name
                     locale_dir = agent_dir / 'locale'
@@ -50,6 +49,10 @@ class AgentBase(ABC):
                     print(f"Exception creating translator: {e}")
                     self._translator = gettext.NullTranslations()
         return self._translator
+    
+    def refresh_translator(self):
+        """Refresh the translator when user language changes"""
+        self._translator = None
     
     def _(self, message: str) -> str:
         """Translate a message using gettext"""

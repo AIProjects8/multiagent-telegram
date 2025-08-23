@@ -59,6 +59,7 @@ class ConfigurationAgent(AgentBase):
             if lang in ['en', 'pl']:
                 self.questionnaire_answers['language'] = lang
                 self._save_configuration()
+                self.refresh_translator()  # Refresh translator to use new language
                 return self._get_city_question()
             else:
                 return self._get_language_question(message.ui_language)
