@@ -1,28 +1,19 @@
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session
-import os
-from dotenv import load_dotenv
 from .models import Base
 from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_default_agent, init_time_agent, init_time_agent_item, init_scheduler, init_configuration_agent
-
-load_dotenv()
+from config import Config
 
 def get_database_url(): 
-    POSTGRES_USER = os.getenv('POSTGRES_USER') 
-    POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD') 
-    POSTGRES_DB = os.getenv('POSTGRES_DB') 
-    POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
-    POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+    config = Config.from_env()
     
-    print(f"POSTGRES_USER: {POSTGRES_USER}")
-    print(f"POSTGRES_PASSWORD: {POSTGRES_PASSWORD}")
-    print(f"POSTGRES_DB: {POSTGRES_DB}")
-    print(f"POSTGRES_HOST: {POSTGRES_HOST}")
-    print(f"POSTGRES_PORT: {POSTGRES_PORT}")
+    print(f"POSTGRES_USER: {config.postgres_user}")
+    print(f"POSTGRES_PASSWORD: {config.postgres_password}")
+    print(f"POSTGRES_DB: {config.postgres_db}")
+    print(f"POSTGRES_HOST: {config.postgres_host}")
+    print(f"POSTGRES_PORT: {config.postgres_port}")
     
-    if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]): 
-        raise EnvironmentError("Database environment variables are not fully set.") 
-    return f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
+    return f'postgresql://{config.postgres_user}:{config.postgres_password}@{config.postgres_host}:{config.postgres_port}/{config.postgres_db}'
 
 engine = create_engine(get_database_url())
 
@@ -30,7 +21,7 @@ def init_db():
     inspector = inspect(engine)
     existing_tables = inspector.get_table_names()
     
-    required_tables = ['users', 'agents', 'agent_items', 'scheduler', 'conversations']
+    required_tables = ['users', 'agents', 'agent_items', 'scheduler', 'conversation_history']
     missing_tables = [table for table in required_tables if table not in existing_tables]
     
     if missing_tables:

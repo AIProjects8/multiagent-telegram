@@ -46,7 +46,7 @@ if __name__ == "__main__":
         ]
     )
     
-    print("Starting telegram bot. Version 0.0.2")
+    print("Starting telegram bot. Version 0.0.3")
     
     logging.getLogger('httpx').setLevel(logging.WARNING)
     logging.getLogger('telegram').setLevel(logging.WARNING)

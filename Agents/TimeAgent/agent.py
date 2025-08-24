@@ -10,50 +10,56 @@ from timezonefinder import TimezoneFinder
 import pytz
 
 class TimeAgent(AgentBase):
-    def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
-        super().__init__(user_id, configuration, questionnaire_answers)
+    def __init__(self, user_id: str, agent_id: str, agent_configuration: dict, questionnaire_answers: dict = None):
+        super().__init__(user_id, agent_id, agent_configuration, questionnaire_answers)
         self.description = "Agent responsible for time information, sunrise and sunset times"
         config = Config.from_env()
         
-        # Validate temperature configuration
-        if 'temperature' not in configuration:
+        if 'temperature' not in agent_configuration:
             raise ValueError("Temperature configuration not found for time agent")
-        temperature = configuration['temperature']
+        temperature = agent_configuration['temperature']
         
-        # Initialize LLM for query classification
         self.llm = ChatOpenAI(
             model=config.gpt_model,
             temperature=temperature,
             openai_api_key=config.openai_api_key
         )
-        
     
     @property
     def name(self) -> str:
         return "time"
         
     def ask(self, message: Message) -> str:
+        self._save_user_message(message)
+        
         try:
             city_info = self.get_city_info(message)
             self.current_city_name, self.current_city_lat, self.current_city_lon = city_info
         except ValueError as e:
-            return self._("Configuration error: {error}").format(error=str(e))
+            response = self._("Configuration error: {error}").format(error=str(e))
+            self._save_assistant_message(response)
+            return response
         except Exception as e:
-            return self._("Error getting city information: {error}").format(error=str(e))
+            response = self._("Error getting city information: {error}").format(error=str(e))
+            self._save_assistant_message(response)
+            return response
         
-        # Use LangChain to determine what the user is asking for
+        # Get query type considering the full conversation context
         query_type = self._determine_query_type(message.text)
         
         if query_type == "sunrise":
-            return self._handle_sunrise_query()
+            response = self._handle_sunrise_query()
         elif query_type == "sunset":
-            return self._handle_sunset_query()
+            response = self._handle_sunset_query()
         elif query_type == "time":
-            return self._get_current_time()
+            response = self._get_current_time()
         else:
-            return self._("I'm sorry, I don't understand your request. Please try again.")
+            response = self._("I'm sorry, I don't understand your request. Please try again.")
+        
+        self._save_assistant_message(response)
+        return response
     
-    def _determine_query_type(self, message: str) -> str:
+    def _determine_query_type(self, message_text: str) -> str:
         system_prompt = f"""You are a time agent that helps users get information about time including:
         - current time
         - time in a specific city
@@ -82,7 +88,7 @@ class TimeAgent(AgentBase):
         
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=message)
+            HumanMessage(content=message_text)
         ]
         
         try:
@@ -114,7 +120,7 @@ class TimeAgent(AgentBase):
     def _handle_sunset_query(self) -> str:
         try:
             result = get_sunset(self.current_city_lat, self.current_city_lon, self.current_city_name)
-            
+
             if result.get("success"):
                 today_time = result["today_time"]
                 tomorrow_time = result["tomorrow_time"]

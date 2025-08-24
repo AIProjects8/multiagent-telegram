@@ -7,10 +7,10 @@ from Modules.MessageProcessor.message_processor import Message
 
 class WeatherAgent(AgentBase):
     
-    def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
-        super().__init__(user_id, configuration, questionnaire_answers)
+    def __init__(self, user_id: str, agent_id: str, agent_configuration: dict, questionnaire_answers: dict = None):
+        super().__init__(user_id, agent_id, agent_configuration, questionnaire_answers)
         self.config = Config.from_env()
-        temperature = self.configuration.get('temperature')
+        temperature = self.agent_configuration.get('temperature')
         self.llm = ChatOpenAI(
             api_key=self.config.openai_api_key,
             model=self.config.gpt_model,
@@ -18,7 +18,10 @@ class WeatherAgent(AgentBase):
         )
     
     def ask(self, message: Message) -> str:
-        return self._get_response(message)
+        self._save_user_message(message)
+        response = self._get_response(message)
+        self._save_assistant_message(response)
+        return response
 
     def _get_response(self, message: Message) -> str:
         try:

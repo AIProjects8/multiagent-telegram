@@ -41,14 +41,14 @@ class AgentRooter:
             
             for agent in agents:
                 keywords = [k.strip().lower() for k in agent.keywords.split(',') if k.strip()]
-                configuration = agent.configuration
-                if isinstance(configuration, str):
-                    configuration = json.loads(configuration)
+                agent_configuration = agent.configuration
+                if isinstance(agent_configuration, str):
+                    agent_configuration = json.loads(agent_configuration)
                 agent_obj = {
                     'id': str(agent.id),
                     'name': agent.name,
                     'keywords': keywords,
-                    'configuration': configuration
+                    'configuration': agent_configuration
                 }
                 self._agents.append(agent_obj)
                 for kw in keywords:
@@ -95,7 +95,8 @@ class AgentRooter:
         agent_instance = AgentFactory.create_agent(
             agent_name=agent_name,
             user_id=user_id,
-            configuration=agent_obj['configuration'],
+            agent_id=agent_obj['id'],
+            agent_configuration=agent_obj['configuration'],
             questionnaire_answers=questionnaire_answers
         )
         

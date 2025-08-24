@@ -6,8 +6,8 @@ from Modules.MessageProcessor.message_processor import Message
 from Modules.CityHelper.city_helper import CityHelper
 
 class ConfigurationAgent(AgentBase):
-    def __init__(self, user_id: str, configuration: dict, questionnaire_answers: dict = None):
-        super().__init__(user_id, configuration, questionnaire_answers)
+    def __init__(self, user_id: str, agent_id: str, agent_configuration: dict, questionnaire_answers: dict = None):
+        super().__init__(user_id, agent_id, agent_configuration, questionnaire_answers)
         self.config = Config.from_env()
         self.llm = ChatOpenAI(
             api_key=self.config.openai_api_key,
@@ -22,19 +22,24 @@ class ConfigurationAgent(AgentBase):
         }
     
     def ask(self, message: Message) -> str:
-        # Check if user has completed configuration
-        if self._is_configuration_complete():
-            return self._("Configuration is already complete. You can now use other agents.")
+        self._save_user_message(message)
         
-        # Get current step
+        if self._is_configuration_complete():
+            response = self._("Configuration is already complete. You can now use other agents.")
+            self._save_assistant_message(response)
+            return response
+        
         current_step = self._get_current_step()
         
         if current_step == 'language':
-            return self._ask_language(message)
+            response = self._ask_language(message)
         elif current_step == 'city':
-            return self._ask_city(message)
+            response = self._ask_city(message)
         else:
-            return self._("Configuration error. Please contact support.")
+            response = self._("Configuration error. Please contact support.")
+        
+        self._save_assistant_message(response)
+        return response
     
     def _is_configuration_complete(self) -> bool:
         """Check if user has completed all configuration steps"""

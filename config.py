@@ -16,6 +16,12 @@ class Config:
     gpt_model: str
     allowed_user_ids: list[int]
     app_keyword: str
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
+    postgres_host: str
+    postgres_port: str
+    time_zone: str
 
     @classmethod
     def from_env(cls) -> 'Config':
@@ -33,7 +39,13 @@ class Config:
             voice_response=os.getenv("VOICE_RESPONSE"),
             gpt_model=os.getenv("GPT_MODEL"),
             allowed_user_ids=allowed_user_ids,
-            app_keyword=os.getenv("APP_KEYWORD")
+            app_keyword=os.getenv("APP_KEYWORD"),
+            postgres_user=os.getenv("POSTGRES_USER", "postgres"),
+            postgres_password=os.getenv("POSTGRES_PASSWORD", "postgres"),
+            postgres_db=os.getenv("POSTGRES_DB", "multiagent_bot"),
+            postgres_host=os.getenv("POSTGRES_HOST", "localhost"),
+            postgres_port=os.getenv("POSTGRES_PORT", "5432"),
+            time_zone=os.getenv("TIME_ZONE", "UTC")
     )
 
     def validate(self) -> None:
@@ -57,6 +69,18 @@ class Config:
             missing_vars.append("ALLOWED_USER_IDS")
         if not self.app_keyword:
             missing_vars.append("APP_KEYWORD")
+        if not self.postgres_user:
+            missing_vars.append("POSTGRES_USER")
+        if not self.postgres_password:
+            missing_vars.append("POSTGRES_PASSWORD")
+        if not self.postgres_db:
+            missing_vars.append("POSTGRES_DB")
+        if not self.postgres_host:
+            missing_vars.append("POSTGRES_HOST")
+        if not self.postgres_port:
+            missing_vars.append("POSTGRES_PORT")
+        if not self.time_zone:
+            missing_vars.append("TIME_ZONE")
             
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}") 

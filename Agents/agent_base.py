@@ -5,17 +5,28 @@ from pathlib import Path
 from Modules.MessageProcessor.message_processor import Message
 from Modules.UserManager.user_manager import UserManager
 from Modules.CityHelper import CityHelper
+from Modules.ConversationMemory import get_conversation_memory_manager
 
 class AgentBase(ABC):
     """Base interface for all agents in the system"""
     
-    def __init__(self, user_id: str, configuration: Dict[str, Any], questionnaire_answers: Optional[Dict[str, Any]] = None):
+    def __init__(self, user_id: str, agent_id: str, agent_configuration: Dict[str, Any], questionnaire_answers: Optional[Dict[str, Any]] = None):
         self.user_id = user_id
-        self.configuration = configuration
+        self.agent_id = agent_id
+        self.agent_configuration = agent_configuration
         self.questionnaire_answers = questionnaire_answers or {}
         self._user_manager = UserManager()
         self._city_helper = None
         self._translator = None
+        self._conversation_memory_manager = get_conversation_memory_manager()
+        self._chat_history = None
+        self._initialize_conversation_memory()
+    
+    def _initialize_conversation_memory(self):
+        self._chat_history = self._conversation_memory_manager.get_chat_history(
+            self.user_id, 
+            self.agent_id
+        )
     
     def _get_user_language(self) -> str:
         """Get user's preferred language from cache, defaults to 'en' if not configured"""
@@ -59,6 +70,27 @@ class AgentBase(ABC):
         translator = self._get_translator()
         return translator.gettext(message)
     
+    def _save_user_message(self, message: Message):
+        if self._chat_history:
+            self._chat_history.add_user_message(message.text)
+    
+    def _save_assistant_message(self, response: str):
+        if self._chat_history:
+            self._chat_history.add_ai_message(response)
+    
+    def _save_tool_call(self, tool_call_content: str):
+        if self._chat_history:
+            self._chat_history.add_tool_call(tool_call_content)
+    
+    def _get_chat_history(self):
+        if self._chat_history:
+            return self._chat_history.messages
+        return []
+    
+    def clear_conversation_history(self):
+        if self._chat_history:
+            self._chat_history.clear()
+    
     @abstractmethod
     def ask(self, message: Message) -> str:
         """Process a user message and return a response"""
@@ -74,7 +106,7 @@ class AgentBase(ABC):
         """Common method to get city name and coordinates from message or configuration"""
 
         if self._city_helper is None:
-            temperature = self.configuration.get('temperature', 0.7)
+            temperature = self.agent_configuration.get('temperature', 0.7)
             self._city_helper = CityHelper(temperature=temperature)
         
         # First, try to extract city from message
