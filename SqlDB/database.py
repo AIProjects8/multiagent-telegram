@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session
 from .models import Base
-from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_default_agent, init_time_agent, init_time_agent_item, init_scheduler, init_configuration_agent
+from SqlDB.SampleData.db_initializer import init_user, init_agent_item, init_weather_agent, init_default_agent, init_time_agent, init_time_agent_item, init_scheduler, init_configuration_agent, init_youtube_agent
 from config import Config
 
 def get_database_url(): 
@@ -40,6 +40,7 @@ def init_db():
         init_weather_agent(db)
         init_default_agent(db)
         init_time_agent(db)
+        init_youtube_agent(db)
         init_agent_item(db)
         init_time_agent_item(db)
         init_scheduler(db)

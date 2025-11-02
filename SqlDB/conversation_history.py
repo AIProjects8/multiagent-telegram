@@ -12,10 +12,11 @@ class ConversationHistoryService:
     def _get_session(self) -> Session:
         return Session(self.engine)
     
-    def save_message(self, user_id: str, agent_id: str, role: str, content: str) -> str:
+    def save_message(self, user_id: str, agent_id: str, role: str, content: str, session_id: str = None) -> str:
         session = self._get_session()
         try:
-            session_id = f"{user_id}:{agent_id}"
+            if session_id is None:
+                session_id = f"{user_id}:{agent_id}"
             
             conversation_message = ConversationHistory(
                 user_id=uuid.UUID(user_id),
@@ -32,14 +33,16 @@ class ConversationHistoryService:
         finally:
             session.close()
     
-    def get_conversation_history(self, user_id: str, agent_id: str, limit: int = 10, exclude_tool_calls: bool = True) -> List[dict]:
+    def get_conversation_history(self, user_id: str, agent_id: str, limit: int = 10, exclude_tool_calls: bool = True, session_id: str = None) -> List[dict]:
         session = self._get_session()
         try:
-            session_id = f"{user_id}:{agent_id}"
-            
             query = session.query(ConversationHistory).filter(
-                ConversationHistory.session_id == session_id
+                ConversationHistory.user_id == uuid.UUID(user_id),
+                ConversationHistory.agent_id == uuid.UUID(agent_id)
             )
+            
+            if session_id is not None:
+                query = query.filter(ConversationHistory.session_id == session_id)
             
             if exclude_tool_calls:
                 query = query.filter(ConversationHistory.role != 'tool')

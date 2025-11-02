@@ -97,6 +97,26 @@ def init_time_agent(db: Session):
     else:
         print("Time agent already exists")
 
+def init_youtube_agent(db: Session):
+    existing_agent = db.query(Agent).filter(Agent.name == 'youtube').first()
+    
+    if not existing_agent:
+        youtube_config = {
+            "temperature": 0.7
+        }
+        
+        youtube_agent = Agent(
+            name='youtube',
+            keywords='youtube',
+            configuration=youtube_config
+        )
+        
+        db.add(youtube_agent)
+        db.commit()
+        print("Youtube agent created successfully")
+    else:
+        print("Youtube agent already exists")
+
 def init_agent_item(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()
     if not user:
