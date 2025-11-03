@@ -36,7 +36,7 @@ class YoutubeAgent(AgentBase):
     
     def ask(self, message: Message) -> str:
         youtube_url = extract_youtube_url(message.text)
-        
+        self._save_message('user', message.text, session_id)
         if youtube_url:
             session_id = youtube_url
             
@@ -44,6 +44,7 @@ class YoutubeAgent(AgentBase):
                 video_id = extract_video_id(youtube_url)
                 
                 transcription = fetch_transcription(youtube_url)
+                self._save_message('tool', transcription, session_id)
                 video_title, video_date = get_video_metadata(video_id)
                 summary_content = summarize_transcription(transcription, self.llm)
                 
@@ -52,7 +53,6 @@ class YoutubeAgent(AgentBase):
 
 {summary_content}
 """
-                self._save_message('user', message.text, session_id)
                 self._save_message('assistant', full_summary, session_id)
                 return full_summary
                 
@@ -82,7 +82,7 @@ class YoutubeAgent(AgentBase):
                 self.user_id,
                 self.agent_id,
                 limit=None,
-                exclude_tool_calls=True,
+                exclude_tool_calls=False,
                 session_id=last_session_id
             )
             
@@ -103,6 +103,8 @@ class YoutubeAgent(AgentBase):
                     messages.append(HumanMessage(content=msg['content']))
                 elif msg['role'] == 'assistant':
                     messages.append(AIMessage(content=msg['content']))
+                elif msg['role'] == 'tool':
+                    messages.append(SystemMessage(content=f"Full video transcription:\n{msg['content']}"))
             
             messages.append(HumanMessage(content=message.text))
             

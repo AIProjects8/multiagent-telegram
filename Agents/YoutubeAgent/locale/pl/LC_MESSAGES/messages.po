@@ -29,3 +29,6 @@ msgstr "Data publikacji"
 msgid "You are a helpful assistant. Answer based on the conversation history and current message. Be straight to the point without long explanations. If the user wants more details, they will ask."
 msgstr "Jesteś pomocnym asystentem. Odpowiadaj na podstawie historii rozmowy i aktualnej wiadomości. Bądź zwięzły, bez długich wyjaśnień. Jeśli użytkownik chce więcej szczegółów, zapyta."
 
+msgid "Full video transcription is available in the context. You can answer questions about both the summary and the complete transcription."
+msgstr "Pełna transkrypcja wideo jest dostępna w kontekście. Możesz odpowiadać na pytania dotyczące zarówno podsumowania, jak i pełnej transkrypcji."
+
