@@ -8,7 +8,6 @@ from .youtube_tools import (
     extract_youtube_url,
     extract_video_id,
     get_video_metadata,
-    get_channel_metadata,
     fetch_transcription
 )
 from .transcription_tools import (
@@ -46,23 +45,19 @@ class YoutubeAgent(AgentBase):
                 
                 transcription = fetch_transcription(youtube_url)
                 video_title, video_date = get_video_metadata(video_id)
-                channel_name, channel_url = get_channel_metadata(video_id)
                 summary_content = summarize_transcription(transcription, self.llm)
                 
-                full_summary = f"""Tytuł: {video_title}
-Data publikacji: {video_date}
+                full_summary = f"""{self._("Title")}: {video_title}
+{self._("Publication date")}: {video_date}
 
 {summary_content}
-
-Link do filmu: {youtube_url}
-Kanał: {channel_name}
-Link do kanału: {channel_url}"""
+"""
                 self._save_message('user', message.text, session_id)
                 self._save_message('assistant', full_summary, session_id)
                 return full_summary
                 
             except Exception as e:
-                error_msg = f"Error processing YouTube video: {str(e)}"
+                error_msg = self._("Error processing YouTube video: {error}").format(error=str(e))
                 self._save_message('assistant', error_msg, session_id)
                 return error_msg
         else:
@@ -73,13 +68,13 @@ Link do kanału: {channel_url}"""
             
             if not last_session_id:
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
-                response = "Insert youtube link to generate summary."
+                response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
                 return response
             
             if not extract_youtube_url(last_session_id):
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
-                response = "Insert youtube link to generate summary."
+                response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
                 return response
             
@@ -93,13 +88,13 @@ Link do kanału: {channel_url}"""
             
             if not history_messages:
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
-                response = "Insert youtube link to generate summary."
+                response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
                 return response
              
             history_messages.reverse()
             
-            system_prompt = "You are a helpful assistant. Answer based on the conversation history and current message."
+            system_prompt = self._("You are a helpful assistant. Answer based on the conversation history and current message. Be straight to the point without long explanations. If the user wants more details, they will ask.")
             
             messages = [SystemMessage(content=system_prompt)]
             
@@ -118,7 +113,7 @@ Link do kanału: {channel_url}"""
                 self._save_message('assistant', response_content, last_session_id)
                 return response_content
             except Exception as e:
-                error_msg = f"Error generating response: {str(e)}"
+                error_msg = self._("Error generating response: {error}").format(error=str(e))
                 self._save_message('assistant', error_msg, last_session_id)
                 return error_msg
     
