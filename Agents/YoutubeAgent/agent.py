@@ -1,19 +1,32 @@
 from Agents.agent_base import AgentBase
 from Modules.MessageProcessor.message_processor import Message
 from SqlDB.conversation_history import ConversationHistoryService
-from datetime import datetime
+from langchain_openai import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
+from config import Config
+from .youtube_tools import (
+    extract_youtube_url,
+    extract_video_id,
+    get_video_metadata,
+    get_channel_metadata,
+    fetch_transcription
+)
+from .transcription_tools import (
+    summarize_transcription
+)
 
 class YoutubeAgent(AgentBase):
     def __init__(self, user_id: str, agent_id: str, agent_configuration: dict, questionnaire_answers: dict = None):
         super().__init__(user_id, agent_id, agent_configuration, questionnaire_answers)
         self.conversation_service = ConversationHistoryService()
+        self.config = Config.from_env()
+        self.llm = ChatOpenAI(
+            api_key=self.config.openai_api_key,
+            model=self.config.gpt_model,
+            temperature=self.agent_configuration.get('temperature', 0.7)
+        )
     
-    def _get_session_id(self) -> str:
-        now = datetime.now()
-        return now.strftime("%d-%m-%Y-%H")
-    
-    def _save_message(self, role: str, content: str):
-        session_id = self._get_session_id()
+    def _save_message(self, role: str, content: str, session_id: str):
         self.conversation_service.save_message(
             self.user_id,
             self.agent_id,
@@ -23,32 +36,92 @@ class YoutubeAgent(AgentBase):
         )
     
     def ask(self, message: Message) -> str:
-        self._save_message('user', message.text)
+        youtube_url = extract_youtube_url(message.text)
         
-        session_id = self._get_session_id()
-        history_messages = self.conversation_service.get_conversation_history(
-            self.user_id,
-            self.agent_id,
-            limit=2,
-            exclude_tool_calls=True,
-            session_id=session_id
-        )
-        
-        last_assistant_message = None
-        for msg in history_messages:
-            if msg['role'] == 'assistant':
-                last_assistant_message = msg['content']
-                break
-        
-        if last_assistant_message:
-            response = last_assistant_message + message.text
+        if youtube_url:
+            session_id = youtube_url
+            
+            try:
+                video_id = extract_video_id(youtube_url)
+                
+                transcription = fetch_transcription(youtube_url)
+                video_title, video_date = get_video_metadata(video_id)
+                channel_name, channel_url = get_channel_metadata(video_id)
+                summary_content = summarize_transcription(transcription, self.llm)
+                
+                full_summary = f"""Tytuł: {video_title}
+Data publikacji: {video_date}
+
+{summary_content}
+
+Link do filmu: {youtube_url}
+Kanał: {channel_name}
+Link do kanału: {channel_url}"""
+                self._save_message('user', message.text, session_id)
+                self._save_message('assistant', full_summary, session_id)
+                return full_summary
+                
+            except Exception as e:
+                error_msg = f"Error processing YouTube video: {str(e)}"
+                self._save_message('assistant', error_msg, session_id)
+                return error_msg
         else:
-            response = message.text
-        
-        self._save_message('assistant', response)
-        return response
+            last_session_id = self.conversation_service.get_last_session_id(
+                self.user_id,
+                self.agent_id
+            )
+            
+            if not last_session_id:
+                self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
+                response = "Insert youtube link to generate summary."
+                self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
+                return response
+            
+            if not extract_youtube_url(last_session_id):
+                self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
+                response = "Insert youtube link to generate summary."
+                self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
+                return response
+            
+            history_messages = self.conversation_service.get_conversation_history(
+                self.user_id,
+                self.agent_id,
+                limit=None,
+                exclude_tool_calls=True,
+                session_id=last_session_id
+            )
+            
+            if not history_messages:
+                self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
+                response = "Insert youtube link to generate summary."
+                self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
+                return response
+             
+            history_messages.reverse()
+            
+            system_prompt = "You are a helpful assistant. Answer based on the conversation history and current message."
+            
+            messages = [SystemMessage(content=system_prompt)]
+            
+            for msg in history_messages:
+                if msg['role'] == 'user':
+                    messages.append(HumanMessage(content=msg['content']))
+                elif msg['role'] == 'assistant':
+                    messages.append(AIMessage(content=msg['content']))
+            
+            messages.append(HumanMessage(content=message.text))
+            
+            try:
+                response = self.llm.invoke(messages)
+                response_content = response.content
+                self._save_message('user', message.text, last_session_id)
+                self._save_message('assistant', response_content, last_session_id)
+                return response_content
+            except Exception as e:
+                error_msg = f"Error generating response: {str(e)}"
+                self._save_message('assistant', error_msg, last_session_id)
+                return error_msg
     
     @property
     def name(self) -> str:
         return "youtube"
-

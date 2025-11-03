@@ -12,3 +12,4 @@ APScheduler==3.11.0
 timezonefinder==8.1.0
 pytest==8.4.1
 python-gettext==5.0
+youtube-transcript-api
