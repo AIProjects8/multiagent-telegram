@@ -1,4 +1,4 @@
-# multiagent-telegram
+# Multiagent Telegram Bot
 Welcome in the Multiagent Telegram Bot!
 
 If you want to run multiple agents in single telegram bot - this is the right place. You can check existing agents (Weather, Clock, YouTube) and then create your own. Let's get to work!
