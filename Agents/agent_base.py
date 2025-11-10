@@ -8,6 +8,7 @@ from Modules.CityHelper import CityHelper
 from Modules.ConversationMemory import get_conversation_memory_manager
 
 class AgentBase(ABC):
+    TELEGRAM_MAX_MESSAGE_LENGTH = 4096
  
     def __init__(self, user_id: str, agent_id: str, agent_configuration: Dict[str, Any], questionnaire_answers: Optional[Dict[str, Any]] = None):
         self.user_id = user_id
@@ -81,6 +82,14 @@ class AgentBase(ABC):
         if self._chat_history:
             return self._chat_history.messages
         return []
+    
+    def _truncate_message(self, message: str) -> str:
+        if len(message) > self.TELEGRAM_MAX_MESSAGE_LENGTH:
+            return message[:self.TELEGRAM_MAX_MESSAGE_LENGTH - 3] + "..."
+        return message
+    
+    def response(self, content: str) -> str:
+        return self._truncate_message(content)
     
     def clear_conversation_history(self):
         if self._chat_history:

@@ -13,3 +13,6 @@ msgstr ""
 
 msgid "Sorry, I encountered an error: {error}"
 msgstr "Sorry, I encountered an error: {error}"
+
+msgid "Response content is empty"
+msgstr "Response content is empty"
