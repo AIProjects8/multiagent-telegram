@@ -1,9 +1,9 @@
 from typing import Dict, Any, Callable
 from datetime import datetime
 import pytz
-from Modules.TranslationTools.pl.constants import day_names
 from suntime import Sun
 import gettext
+from Modules.TranslationTools.pl.constants import day_names
 
 def format_weather_response(weather_data: Dict[str, Any], city_name: str, translate_func: Callable[[str], str]) -> str:
     if "error" in weather_data:
