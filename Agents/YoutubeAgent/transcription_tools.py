@@ -53,7 +53,7 @@ Transkrypcja:
 """
     
     try:
-        from langchain.schema import HumanMessage
+        from langchain_core.messages import HumanMessage
         messages = [HumanMessage(content=prompt)]
         response = llm.invoke(messages)
         result = response.content

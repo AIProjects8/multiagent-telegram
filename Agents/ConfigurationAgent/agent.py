@@ -1,6 +1,5 @@
 from Agents.agent_base import AgentBase
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
 from config import Config
 from Modules.MessageProcessor.message_processor import Message
 from Modules.CityHelper.city_helper import CityHelper

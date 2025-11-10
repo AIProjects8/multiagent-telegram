@@ -2,7 +2,7 @@ from Agents.agent_base import AgentBase
 from Modules.MessageProcessor.message_processor import Message
 from SqlDB.conversation_history import ConversationHistoryService
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from config import Config
 from .youtube_tools import (
     extract_youtube_url,

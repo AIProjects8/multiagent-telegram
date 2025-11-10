@@ -1,7 +1,7 @@
 from datetime import datetime, UTC
 from .tools import get_sunrise, get_sunset
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from config import Config
 from Agents.agent_base import AgentBase
 from Modules.MessageProcessor.message_processor import Message

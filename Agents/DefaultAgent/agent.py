@@ -1,6 +1,6 @@
 from Agents.agent_base import AgentBase
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from config import Config
 from Modules.MessageProcessor.message_processor import Message
 
@@ -16,8 +16,6 @@ class DefaultAgent(AgentBase):
         )
     
     def ask(self, message: Message) -> str:
-        self._save_user_message(message)
-        
         system_prompt = "You are a helpful AI assistant responding to user. Provide clear, concise, and helpful responses. Respond in the same language as the user's message."
         
         chat_history = self._get_chat_history()
@@ -27,12 +25,15 @@ class DefaultAgent(AgentBase):
             response = self.llm.invoke(messages)
             response_content = response.content
             
+            if response_content is '':
+                raise Exception("Response content is empty")
+            
+            self._save_user_message(message)
             self._save_assistant_message(response_content)
             return response_content
                 
         except Exception as e:
             error_response = self._("Sorry, I encountered an error: {error}").format(error=str(e))
-            self._save_assistant_message(error_response)
             return error_response
     
     @property
