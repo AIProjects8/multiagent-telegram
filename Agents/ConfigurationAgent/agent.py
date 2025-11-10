@@ -26,7 +26,7 @@ class ConfigurationAgent(AgentBase):
         if self._is_configuration_complete():
             response = self._("Configuration is already complete. You can now use other agents.")
             self._save_assistant_message(response)
-            return response
+            return self.response(response)
         
         current_step = self._get_current_step()
         
@@ -38,7 +38,7 @@ class ConfigurationAgent(AgentBase):
             response = self._("Configuration error. Please contact support.")
         
         self._save_assistant_message(response)
-        return response
+        return self.response(response)
     
     def _is_configuration_complete(self) -> bool:
         """Check if user has completed all configuration steps"""

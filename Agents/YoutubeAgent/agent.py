@@ -22,7 +22,7 @@ class YoutubeAgent(AgentBase):
         self.llm = ChatOpenAI(
             api_key=self.config.openai_api_key,
             model=self.config.gpt_model,
-            temperature=self.agent_configuration.get('temperature', 0.7)
+            temperature=self.agent_configuration.get('temperature', 0.2)
         )
     
     def _save_message(self, role: str, content: str, session_id: str):
@@ -36,7 +36,7 @@ class YoutubeAgent(AgentBase):
     
     def ask(self, message: Message) -> str:
         youtube_url = extract_youtube_url(message.text)
-        self._save_message('user', message.text, session_id)
+
         if youtube_url:
             session_id = youtube_url
             
@@ -44,7 +44,7 @@ class YoutubeAgent(AgentBase):
                 video_id = extract_video_id(youtube_url)
                 
                 transcription = fetch_transcription(youtube_url)
-                self._save_message('tool', transcription, session_id)
+
                 video_title, video_date = get_video_metadata(video_id)
                 summary_content = summarize_transcription(transcription, self.llm)
                 
@@ -53,13 +53,15 @@ class YoutubeAgent(AgentBase):
 
 {summary_content}
 """
+                self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
+                self._save_message('tool', transcription, session_id)
                 self._save_message('assistant', full_summary, session_id)
-                return full_summary
+                return self.response(full_summary)
                 
             except Exception as e:
                 error_msg = self._("Error processing YouTube video: {error}").format(error=str(e))
                 self._save_message('assistant', error_msg, session_id)
-                return error_msg
+                return self.response(error_msg)
         else:
             last_session_id = self.conversation_service.get_last_session_id(
                 self.user_id,
@@ -70,13 +72,13 @@ class YoutubeAgent(AgentBase):
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
                 response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
-                return response
+                return self.response(response)
             
             if not extract_youtube_url(last_session_id):
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
                 response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
-                return response
+                return self.response(response)
             
             history_messages = self.conversation_service.get_conversation_history(
                 self.user_id,
@@ -90,7 +92,7 @@ class YoutubeAgent(AgentBase):
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
                 response = self._("Insert youtube link to generate summary.")
                 self._save_message('assistant', response, f"{self.user_id}:{self.agent_id}")
-                return response
+                return self.response(response)
              
             history_messages.reverse()
             
@@ -113,11 +115,11 @@ class YoutubeAgent(AgentBase):
                 response_content = response.content
                 self._save_message('user', message.text, last_session_id)
                 self._save_message('assistant', response_content, last_session_id)
-                return response_content
+                return self.response(response_content)
             except Exception as e:
                 error_msg = self._("Error generating response: {error}").format(error=str(e))
                 self._save_message('assistant', error_msg, last_session_id)
-                return error_msg
+                return self.response(error_msg)
     
     @property
     def name(self) -> str:

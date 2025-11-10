@@ -38,11 +38,11 @@ class TimeAgent(AgentBase):
         except ValueError as e:
             response = self._("Configuration error: {error}").format(error=str(e))
             self._save_assistant_message(response)
-            return response
+            return self.response(response)
         except Exception as e:
             response = self._("Error getting city information: {error}").format(error=str(e))
             self._save_assistant_message(response)
-            return response
+            return self.response(response)
         
         # Get query type considering the full conversation context
         query_type = self._determine_query_type(message.text)
@@ -57,7 +57,7 @@ class TimeAgent(AgentBase):
             response = self._("I'm sorry, I don't understand your request. Please try again.")
         
         self._save_assistant_message(response)
-        return response
+        return self.response(response)
     
     def _determine_query_type(self, message_text: str) -> str:
         system_prompt = f"""You are a time agent that helps users get information about time including:

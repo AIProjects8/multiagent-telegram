@@ -21,7 +21,7 @@ class WeatherAgent(AgentBase):
         self._save_user_message(message)
         response = self._get_response(message)
         self._save_assistant_message(response)
-        return response
+        return self.response(response)
 
     def _get_response(self, message: Message) -> str:
         try:
