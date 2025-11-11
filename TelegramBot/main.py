@@ -16,6 +16,8 @@ from TelegramBot.Handlers.errors_handler import error
 from SqlDB.database import init_db
 import logging
 
+import Modules.TranslationTools.pl.constants
+
 config = Config.from_env()
 config.validate()
 

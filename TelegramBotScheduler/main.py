@@ -9,6 +9,8 @@ from config import Config
 from SqlDB.database import init_db
 from Modules.Scheduler.scheduler import SchedulerService
 
+import Modules.TranslationTools.pl.constants
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
