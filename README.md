@@ -22,12 +22,18 @@ Debug the application by using configuration from the `./vscode/launch.json` fil
 
 ### Run on remote host
 
-```
-docker compose build
-docker compose up -d
+**Quick start:**
+```bash
+./deploy.sh
 ```
 
-Make sure to run `docker compose build` each time you pull a new version.
+**Manual deployment:**
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+For detailed deployment instructions, troubleshooting, and best practices, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### Usage
 

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+ENV_FILE=".env"
+COMPOSE_FILE="docker-compose.yml"
+PROD_COMPOSE_FILE="docker-compose.prod.yml"
+
+echo "=== Multiagent Telegram Bot Deployment Script ==="
+echo ""
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "ERROR: .env file not found!"
+    echo "Please create .env file based on .env.example"
+    exit 1
+fi
+
+echo "Step 1: Checking Docker and Docker Compose..."
+if ! command -v docker &> /dev/null; then
+    echo "ERROR: Docker is not installed"
+    exit 1
+fi
+
+if ! command -v docker compose &> /dev/null && ! command -v docker-compose &> /dev/null; then
+    echo "ERROR: Docker Compose is not installed"
+    exit 1
+fi
+
+COMPOSE_CMD="docker compose"
+if ! docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+fi
+
+echo "✓ Docker and Docker Compose found"
+echo ""
+
+echo "Step 2: Stopping existing containers..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" down
+echo ""
+
+echo "Step 3: Pulling latest code (if using git)..."
+if [ -d ".git" ]; then
+    git pull || echo "Warning: Git pull failed, continuing with local code"
+    echo ""
+fi
+
+echo "Step 4: Building Docker images..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" build --no-cache
+echo ""
+
+echo "Step 5: Starting services..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d
+echo ""
+
+echo "Step 6: Waiting for services to be healthy..."
+sleep 5
+
+echo "Step 7: Checking service status..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps
+echo ""
+
+echo "Step 8: Viewing logs (last 50 lines)..."
+echo "--- Bot logs ---"
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" logs --tail=50 bot
+echo ""
+echo "--- Scheduler logs ---"
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" logs --tail=50 scheduler
+echo ""
+
+echo "=== Deployment completed! ==="
+echo ""
+echo "Useful commands:"
+echo "  View logs:        $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE logs -f [service]"
+echo "  Stop services:    $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE down"
+echo "  Restart service:  $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE restart [service]"
+echo "  View status:      $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE ps"
+
