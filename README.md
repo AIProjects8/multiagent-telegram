@@ -22,18 +22,12 @@ Debug the application by using configuration from the `./vscode/launch.json` fil
 
 ### Run on remote host
 
-**Quick start:**
-```bash
+```
+cd multiagent-telegram
 ./deploy.sh
 ```
 
-**Manual deployment:**
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml build
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-For detailed deployment instructions, troubleshooting, and best practices, see [DEPLOYMENT.md](DEPLOYMENT.md).
+Make sure to run `./deploy.sh` each time you pull a new version.
 
 ### Usage
 
