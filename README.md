@@ -23,11 +23,11 @@ Debug the application by using configuration from the `./vscode/launch.json` fil
 ### Run on remote host
 
 ```
-docker compose build
-docker compose up -d
+cd multiagent-telegram
+./deploy.sh
 ```
 
-Make sure to run `docker compose build` each time you pull a new version.
+Make sure to run `./deploy.sh` each time you pull a new version.
 
 ### Usage
 
