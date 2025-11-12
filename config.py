@@ -22,6 +22,8 @@ class Config:
     postgres_host: str
     postgres_port: str
     time_zone: str
+    proxy_username: str
+    proxy_password: str
 
     @classmethod
     def from_env(cls) -> 'Config':
@@ -45,7 +47,9 @@ class Config:
             postgres_db=os.getenv("POSTGRES_DB", "multiagent_bot"),
             postgres_host=os.getenv("POSTGRES_HOST", "localhost"),
             postgres_port=os.getenv("POSTGRES_PORT", "5432"),
-            time_zone=os.getenv("TIME_ZONE", "UTC")
+            time_zone=os.getenv("TIME_ZONE", "UTC"),
+            proxy_username=os.getenv("PROXY_USERNAME", ""),
+            proxy_password=os.getenv("PROXY_PASSWORD", "")
     )
 
     def validate(self) -> None:
@@ -81,6 +85,10 @@ class Config:
             missing_vars.append("POSTGRES_PORT")
         if not self.time_zone:
             missing_vars.append("TIME_ZONE")
+        if not self.proxy_username:
+            missing_vars.append("PROXY_USERNAME")
+        if not self.proxy_password:
+            missing_vars.append("PROXY_PASSWORD")
             
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}") 

@@ -5,8 +5,20 @@ import re
 from typing import Optional
 import logging
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
+from config import Config
 
 logger = logging.getLogger(__name__)
+
+def _get_youtube_api() -> YouTubeTranscriptApi:
+    config = Config.from_env()
+    if config.proxy_username and config.proxy_password:
+        proxy_config = WebshareProxyConfig(
+            proxy_username=config.proxy_username,
+            proxy_password=config.proxy_password
+        )
+        return YouTubeTranscriptApi(proxy_config=proxy_config)
+    return YouTubeTranscriptApi()
 
 def extract_youtube_url(text: str) -> Optional[str]:
     url_patterns = [
@@ -99,12 +111,13 @@ def get_channel_metadata(video_id: str) -> tuple[str, str]:
 
 def fetch_transcription(video_url: str, language: str = 'pl') -> str:
     video_id = extract_video_id(video_url)
+    ytt_api = _get_youtube_api()
     try:
-        transcript = YouTubeTranscriptApi().fetch(video_id, languages=[language])
+        transcript = ytt_api.fetch(video_id, languages=[language])
     except Exception as e:
         logger.warning(f"No transcript found for video_id={video_id} with language '{language}'. Error: {e}. Attempting to fetch Polish transcript as fallback...")
         try:
-            transcript = YouTubeTranscriptApi().fetch(video_id, languages=['pl'])
+            transcript = ytt_api.fetch(video_id, languages=['pl'])
         except Exception as fallback_error:
             logger.exception(f"Failed to fetch transcript for video_id={video_id} with both language '{language}' and fallback 'pl'. Original error: {e}, Fallback error: {fallback_error}")
             raise
