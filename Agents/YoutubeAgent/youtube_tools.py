@@ -3,7 +3,10 @@ import requests
 from datetime import datetime
 import re
 from typing import Optional
+import logging
 from youtube_transcript_api import YouTubeTranscriptApi
+
+logger = logging.getLogger(__name__)
 
 def extract_youtube_url(text: str) -> Optional[str]:
     url_patterns = [
@@ -36,8 +39,10 @@ def fetch_html_content(video_id: str) -> Optional[str]:
         response = requests.get(f"https://www.youtube.com/watch?v={video_id}")
         if response.status_code == 200:
             return response.text
+        else:
+            logger.error(f"Failed to fetch HTML content for video_id={video_id}. Status code: {response.status_code}")
     except Exception as e:
-        print(f"Could not fetch HTML content: {e}")
+        logger.exception(f"Exception while fetching HTML content for video_id={video_id}: {e}")
     return None
 
 def get_video_metadata(video_id: str) -> tuple[str, str]:
@@ -97,8 +102,12 @@ def fetch_transcription(video_url: str, language: str = 'pl') -> str:
     try:
         transcript = YouTubeTranscriptApi().fetch(video_id, languages=[language])
     except Exception as e:
-        print(f"No transcript found for language '{language}'. Using Polish transcript instead...")
-        transcript = YouTubeTranscriptApi().fetch(video_id, languages=['pl'])
+        logger.warning(f"No transcript found for video_id={video_id} with language '{language}'. Error: {e}. Attempting to fetch Polish transcript as fallback...")
+        try:
+            transcript = YouTubeTranscriptApi().fetch(video_id, languages=['pl'])
+        except Exception as fallback_error:
+            logger.exception(f"Failed to fetch transcript for video_id={video_id} with both language '{language}' and fallback 'pl'. Original error: {e}, Fallback error: {fallback_error}")
+            raise
     
     return '\n'.join([snippet.text for snippet in transcript.snippets if snippet.text.strip()])
 
