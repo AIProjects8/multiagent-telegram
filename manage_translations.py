@@ -56,7 +56,7 @@ def update_translations(agent_name):
 
 def update_all_translations():
     """Update translations for all agents"""
-    agents = ["WeatherAgent", "TimeAgent", "DefaultAgent", "ConfigurationAgent"]
+    agents = ["WeatherAgent", "TimeAgent", "DefaultAgent", "ConfigurationAgent", "YoutubeAgent"]
     
     print("Updating translations for all agents...")
     for agent in agents:
@@ -113,7 +113,7 @@ def extract_messages(agent_name):
 
 def extract_all_messages():
     """Extract messages for all agents"""
-    agents = ["WeatherAgent", "TimeAgent", "DefaultAgent", "ConfigurationAgent"]
+    agents = ["WeatherAgent", "TimeAgent", "DefaultAgent", "ConfigurationAgent", "YoutubeAgent"]
     
     print("Extracting messages for all agents...")
     for agent in agents:

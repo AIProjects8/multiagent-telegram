@@ -45,8 +45,9 @@ class AgentBase(ABC):
                     agent_name = self.name.capitalize() + "Agent"
                     agent_dir = Path(__file__).parent / agent_name
                     locale_dir = agent_dir / 'locale'
+                    mo_file = locale_dir / user_lang / 'LC_MESSAGES' / 'messages.mo'
                     
-                    if locale_dir.exists():
+                    if mo_file.exists():
                         self._translator = gettext.translation(
                             'messages',
                             localedir=str(locale_dir),
