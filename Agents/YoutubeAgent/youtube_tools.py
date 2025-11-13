@@ -46,9 +46,20 @@ def extract_video_id(url: str) -> str:
             return path_parts[path_parts.index('embed') + 1]
     raise ValueError("Invalid YouTube URL")
 
+def _get_proxies() -> Optional[dict]:
+    config = Config.from_env()
+    if config.proxy_username and config.proxy_password:
+        proxy_url = f"http://{config.proxy_username}-rotate:{config.proxy_password}@p.webshare.io:80/"
+        return {
+            "http": proxy_url,
+            "https": proxy_url
+        }
+    return None
+
 def fetch_html_content(video_id: str) -> Optional[str]:
     try:
-        response = requests.get(f"https://www.youtube.com/watch?v={video_id}")
+        proxies = _get_proxies()
+        response = requests.get(f"https://www.youtube.com/watch?v={video_id}", proxies=proxies)
         if response.status_code == 200:
             return response.text
         else:

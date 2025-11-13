@@ -24,6 +24,7 @@ class Config:
     time_zone: str
     proxy_username: str
     proxy_password: str
+    youtube_api_key: str
 
     @classmethod
     def from_env(cls) -> 'Config':
@@ -49,7 +50,8 @@ class Config:
             postgres_port=os.getenv("POSTGRES_PORT", "5432"),
             time_zone=os.getenv("TIME_ZONE", "UTC"),
             proxy_username=os.getenv("PROXY_USERNAME", ""),
-            proxy_password=os.getenv("PROXY_PASSWORD", "")
+            proxy_password=os.getenv("PROXY_PASSWORD", ""),
+            youtube_api_key=os.getenv("YOUTUBE_API_KEY", "")
     )
 
     def validate(self) -> None:
@@ -89,6 +91,8 @@ class Config:
             missing_vars.append("PROXY_USERNAME")
         if not self.proxy_password:
             missing_vars.append("PROXY_PASSWORD")
+        if not self.proxy_password:
+            missing_vars.append("YOUTUBE_API_KEY")
             
         if missing_vars:
             raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}") 
