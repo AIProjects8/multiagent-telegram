@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 import gettext
+import logging
 from pathlib import Path
 from Modules.MessageProcessor.message_processor import Message
 from Modules.UserManager.user_manager import UserManager
 from Modules.CityHelper import CityHelper
 from Modules.ConversationMemory import get_conversation_memory_manager
+
+logger = logging.getLogger(__name__)
 
 class AgentBase(ABC):
     TELEGRAM_MAX_MESSAGE_LENGTH = 4096
@@ -31,8 +34,11 @@ class AgentBase(ABC):
     def _get_user_language(self) -> str:
         user = self._user_manager.cache.get_user_by_id(self.user_id)
         if not user or not user.configuration or not user.configuration.get('language'):
+            logger.info(f"User {self.user_id}: No user or language configuration found, returning default language 'en'")
             return 'en'
-        return user.configuration['language']
+        user_language = user.configuration['language']
+        logger.info(f"User {self.user_id}: Returning user language '{user_language}'")
+        return user_language
     
     def _get_translator(self):
         if self._translator is None:

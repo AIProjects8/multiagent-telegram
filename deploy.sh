@@ -47,22 +47,35 @@ if [ -d ".git" ]; then
     echo ""
 fi
 
-echo "Step 4: Building Docker images..."
+echo "Step 4: Updating localizations (generating .mo files)..."
+if command -v python3 &> /dev/null; then
+    if [ -f "manage_translations.py" ]; then
+        python3 manage_translations.py update-all
+        echo "✓ Localizations updated"
+    else
+        echo "Warning: manage_translations.py not found, skipping localization update"
+    fi
+else
+    echo "Warning: python3 not found, skipping localization update"
+fi
+echo ""
+
+echo "Step 5: Building Docker images..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" build --no-cache
 echo ""
 
-echo "Step 5: Starting services..."
+echo "Step 6: Starting services..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d
 echo ""
 
-echo "Step 6: Waiting for services to be healthy..."
+echo "Step 7: Waiting for services to be healthy..."
 sleep 5
 
-echo "Step 7: Checking service status..."
+echo "Step 8: Checking service status..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps
 echo ""
 
-echo "Step 8: Viewing logs (last 50 lines)..."
+echo "Step 9: Viewing logs (last 50 lines)..."
 echo "--- Bot logs ---"
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" logs --tail=50 bot
 echo ""
