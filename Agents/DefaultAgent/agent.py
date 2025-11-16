@@ -2,7 +2,7 @@ from Agents.agent_base import AgentBase
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from config import Config
-from typing import Optional, Any
+from typing import Any, Callable
 from Modules.MessageProcessor.message_processor import Message
 
 class DefaultAgent(AgentBase):
@@ -15,7 +15,7 @@ class DefaultAgent(AgentBase):
             temperature=self.agent_configuration.get('temperature', 0.7)
         )
     
-    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
         system_prompt = "You are a helpful AI assistant. CRITICAL: Keep your responses as SHORT as possible. Be concise, direct, and avoid unnecessary explanations. Use the minimum number of words needed to answer. Respond in the same language as the user's message."
         
         chat_history = self._get_chat_history()

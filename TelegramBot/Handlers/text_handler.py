@@ -41,8 +41,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not MessageProcessor.should_process_message(message_obj.text):
         return
 
-    chat_id = update.effective_chat.id
-    bot = context.bot
+    async def send_message(text: str):
+        await update.message.reply_text(text)
 
-    response = await get_agent_rooter().ask_current_agent(message_obj, bot, chat_id)
+    response = await get_agent_rooter().ask_current_agent(message_obj, send_message)
     await update.message.reply_text(response)

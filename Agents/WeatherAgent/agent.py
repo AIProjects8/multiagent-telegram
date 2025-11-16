@@ -3,7 +3,7 @@ from Agents.agent_base import AgentBase
 from Agents.WeatherAgent.tools import get_weather
 from Agents.WeatherAgent.response_formatter import format_weather_response
 from config import Config
-from typing import Optional, Any
+from typing import Any, Callable
 from Modules.MessageProcessor.message_processor import Message
 
 class WeatherAgent(AgentBase):
@@ -18,7 +18,7 @@ class WeatherAgent(AgentBase):
             temperature=temperature
         )
     
-    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
         self._save_user_message(message)
         response = self._get_response(message)
         self._save_assistant_message(response)

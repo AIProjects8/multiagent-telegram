@@ -49,10 +49,10 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(transcribed_text)
         return
     
-    chat_id = update.effective_chat.id
-    bot = context.bot
+    async def send_message(text: str):
+        await update.message.reply_text(text)
     
-    response = await get_agent_rooter().ask_current_agent(message_obj, bot, chat_id)
+    response = await get_agent_rooter().ask_current_agent(message_obj, send_message)
     
     response_audio_path = f'./audio/response_{update.message.message_id}.mp3'
     await speech_manager.text_to_speech(response, response_audio_path)

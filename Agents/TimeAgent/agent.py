@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from config import Config
 from Agents.agent_base import AgentBase
-from typing import Optional, Any
+from typing import Any, Callable
 from Modules.MessageProcessor.message_processor import Message
 
 from timezonefinder import TimezoneFinder
@@ -30,7 +30,7 @@ class TimeAgent(AgentBase):
     def name(self) -> str:
         return "time"
         
-    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
         self._save_user_message(message)
         
         try:

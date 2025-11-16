@@ -103,7 +103,7 @@ class AgentBase(ABC):
             self._chat_history.clear()
     
     @abstractmethod
-    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
         pass
     
     @property
