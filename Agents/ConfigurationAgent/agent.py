@@ -1,6 +1,7 @@
 from Agents.agent_base import AgentBase
 from langchain_openai import ChatOpenAI
 from config import Config
+from typing import Optional, Any
 from Modules.MessageProcessor.message_processor import Message
 from Modules.CityHelper.city_helper import CityHelper
 
@@ -20,7 +21,7 @@ class ConfigurationAgent(AgentBase):
             'city': self._ask_city
         }
     
-    def ask(self, message: Message) -> str:
+    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
         self._save_user_message(message)
         
         if self._is_configuration_complete():

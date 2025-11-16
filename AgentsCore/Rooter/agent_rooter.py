@@ -2,6 +2,7 @@ from SqlDB.database import Session, engine
 from SqlDB.models import Agent, AgentItem
 import os
 import json
+from typing import Optional, Any
 from config import Config
 from SqlDB.user_cache import UserCache
 from .agent_factory import AgentFactory
@@ -135,10 +136,10 @@ class AgentRooter:
             
         return self._get_agent_instance(user_id, current_agent['name'])
     
-    def ask_current_agent(self, message: Message) -> str:
+    async def ask_current_agent(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
         agent_instance = self._get_current_agent_instance(message.user_id)
         if agent_instance:
-            return agent_instance.ask(message)
+            return await agent_instance.ask(message, bot, chat_id)
         return "No agent available to respond"
 
     def switch(self, message: Message) -> bool:

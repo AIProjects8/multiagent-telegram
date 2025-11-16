@@ -4,6 +4,7 @@ from SqlDB.conversation_history import ConversationHistoryService
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from config import Config
+from typing import Optional, Any
 from .youtube_tools import (
     extract_youtube_url,
     extract_video_id,
@@ -34,16 +35,22 @@ class YoutubeAgent(AgentBase):
             session_id=session_id
         )
     
-    def ask(self, message: Message) -> str:
+    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
         youtube_url = extract_youtube_url(message.text)
 
         if youtube_url:
             session_id = youtube_url
             
             try:
+                if bot and chat_id:
+                    await bot.send_message(chat_id, self._("Youtube link is correct. Downloading transcription."))
+                
                 video_id = extract_video_id(youtube_url)
                 
                 transcription = fetch_transcription(youtube_url)
+
+                if bot and chat_id:
+                    await bot.send_message(chat_id, self._("Transcription downloaded. Generating summary."))
 
                 video_title, video_date = get_video_metadata(video_id)
                 summary_content = summarize_transcription(transcription, self.llm)

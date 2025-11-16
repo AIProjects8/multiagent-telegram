@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Callable
 import gettext
 import logging
 from pathlib import Path
@@ -103,7 +103,7 @@ class AgentBase(ABC):
             self._chat_history.clear()
     
     @abstractmethod
-    def ask(self, message: Message) -> str:
+    async def ask(self, message: Message, bot: Optional[Any] = None, chat_id: Optional[int] = None) -> str:
         pass
     
     @property

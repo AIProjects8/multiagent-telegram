@@ -98,7 +98,7 @@ class SchedulerService:
                 message_obj = Message(text=text, language=user_language, ui_language='en', user_id=user_id)
                 
                 agent_rooter.switch(message_obj)
-                response = agent_rooter.ask_current_agent(message_obj)
+                response = await agent_rooter.ask_current_agent(message_obj, self.bot, user.chat_id)
                 
                 if message_type == 'voice':
                     await self._send_voice_message(user.chat_id, response, user.telegram_id)
