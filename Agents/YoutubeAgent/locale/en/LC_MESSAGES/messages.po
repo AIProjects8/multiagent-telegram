@@ -11,6 +11,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Youtube link is correct. Downloading transcription."
+msgstr "Youtube link is correct. Downloading transcription."
+
+msgid "Transcription downloaded. Generating summary."
+msgstr "Transcription downloaded. Generating summary."
+
 msgid "Insert youtube link to generate summary."
 msgstr "Insert youtube link to generate summary."
 
