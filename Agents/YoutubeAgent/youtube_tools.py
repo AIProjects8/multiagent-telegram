@@ -120,18 +120,14 @@ def get_channel_metadata(video_id: str) -> tuple[str, str]:
     
     return channel_name, channel_url
 
-def fetch_transcription(video_url: str, language: str = 'pl') -> str:
+def fetch_transcription(video_url: str, language: str) -> str:
     video_id = extract_video_id(video_url)
     ytt_api = _get_youtube_api()
     try:
         transcript = ytt_api.fetch(video_id, languages=[language])
     except Exception as e:
-        logger.warning(f"No transcript found for video_id={video_id} with language '{language}'. Error: {e}. Attempting to fetch Polish transcript as fallback...")
-        try:
-            transcript = ytt_api.fetch(video_id, languages=['pl'])
-        except Exception as fallback_error:
-            logger.exception(f"Failed to fetch transcript for video_id={video_id} with both language '{language}' and fallback 'pl'. Original error: {e}, Fallback error: {fallback_error}")
-            raise
+        logger.warning(f"No transcript found for video_id={video_id} with language '{language}'. Error: {e}")
+        raise
     
     return '\n'.join([snippet.text for snippet in transcript.snippets if snippet.text.strip()])
 

@@ -38,3 +38,9 @@ msgstr "You are a helpful assistant. Answer based on the conversation history an
 msgid "Full video transcription is available in the context. You can answer questions about both the summary and the complete transcription."
 msgstr "Full video transcription is available in the context. You can answer questions about both the summary and the complete transcription."
 
+msgid "Transcription not available in {language}. Trying English..."
+msgstr "Transcription not available in {language}. Trying English..."
+
+msgid "Transcription not available in English."
+msgstr "Transcription not available in English."
+

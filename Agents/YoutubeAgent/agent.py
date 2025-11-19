@@ -46,7 +46,22 @@ class YoutubeAgent(AgentBase):
                 
                 video_id = extract_video_id(youtube_url)
                 
-                transcription = fetch_transcription(youtube_url)
+                user_language = self._get_user_language()
+                transcription = None
+                
+                try:
+                    transcription = fetch_transcription(youtube_url, language=user_language)
+                except Exception:
+                    if user_language != 'en':
+                        await send_message(self._("Transcription not available in {language}. Trying English...").format(language=user_language))
+                        try:
+                            transcription = fetch_transcription(youtube_url, language='en')
+                        except Exception:
+                            await send_message(self._("Transcription not available in English."))
+                            raise
+                    else:
+                        await send_message(self._("Transcription not available in English."))
+                        raise
 
                 await send_message(self._("Transcription downloaded. Generating summary."))
 

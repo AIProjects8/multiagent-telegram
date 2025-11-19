@@ -38,3 +38,9 @@ msgstr "Jesteś pomocnym asystentem. Odpowiadaj na podstawie historii rozmowy i 
 msgid "Full video transcription is available in the context. You can answer questions about both the summary and the complete transcription."
 msgstr "Pełna transkrypcja wideo jest dostępna w kontekście. Możesz odpowiadać na pytania dotyczące zarówno podsumowania, jak i pełnej transkrypcji."
 
+msgid "Transcription not available in {language}. Trying English..."
+msgstr "Transkrypcja niedostępna w języku {language}. Próba pobrania w języku angielskim..."
+
+msgid "Transcription not available in English."
+msgstr "Transkrypcja niedostępna w języku angielskim."
+
