@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CalculatorAgent 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "You are a helpful assistant tasked with performing arithmetic on a set of inputs."
+msgstr "You are a helpful assistant tasked with performing arithmetic on a set of inputs."
+
+msgid "Error processing calculation: {error}"
+msgstr "Error processing calculation: {error}"
+

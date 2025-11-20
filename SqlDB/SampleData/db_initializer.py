@@ -117,6 +117,26 @@ def init_youtube_agent(db: Session):
     else:
         print("Youtube agent already exists")
 
+def init_calculator_agent(db: Session):
+    existing_agent = db.query(Agent).filter(Agent.name == 'calculator').first()
+    
+    if not existing_agent:
+        calculator_config = {
+            "temperature": 0.2
+        }
+        
+        calculator_agent = Agent(
+            name='calculator',
+            keywords='kalkulator',
+            configuration=calculator_config
+        )
+        
+        db.add(calculator_agent)
+        db.commit()
+        print("Calculator agent created successfully")
+    else:
+        print("Calculator agent already exists")
+
 def init_agent_item(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()
     if not user:
