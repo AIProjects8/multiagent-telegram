@@ -1,4 +1,6 @@
 # Multiagent Telegram Bot
+<img width="320" height="320" alt="Gemini_Generated_Image_f59q9pf59q9pf59q" src="https://github.com/user-attachments/assets/079b5d03-292d-48f4-865c-a7606c7f17c8" />
+
 Welcome in the Multiagent Telegram Bot!
 
 If you want to run multiple agents in single telegram bot - this is the right place. You can check existing agents (Weather, Clock, YouTube) and then create your own. Let's get to work!
