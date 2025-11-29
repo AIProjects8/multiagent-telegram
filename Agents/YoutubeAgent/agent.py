@@ -1,8 +1,11 @@
 from Agents.agent_base import AgentBase
+from Agents.streaming_utils import stream_llm_response
 from Modules.MessageProcessor.message_processor import Message
 from SqlDB.conversation_history import ConversationHistoryService
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langgraph.graph import MessagesState, START, END, StateGraph
+from langgraph.checkpoint.memory import MemorySaver
 from config import Config
 from typing import Any, Callable
 from .youtube_tools import (
@@ -25,6 +28,20 @@ class YoutubeAgent(AgentBase):
             model=self.config.gpt_model,
             temperature=self.agent_configuration.get('temperature', 0.2)
         )
+        memory = MemorySaver()
+        self.graph = self._build_graph(memory)
+    
+    def _build_graph(self, memory):
+        def assistant(state: MessagesState):
+            result = self.llm.invoke(state["messages"])
+            return {"messages": [result]}
+        
+        builder = StateGraph(MessagesState)
+        builder.add_node("assistant", assistant)
+        builder.add_edge(START, "assistant")
+        builder.add_edge("assistant", END)
+        
+        return builder.compile(checkpointer=memory)
     
     def _save_message(self, role: str, content: str, session_id: str):
         self.conversation_service.save_message(
@@ -35,7 +52,8 @@ class YoutubeAgent(AgentBase):
             session_id=session_id
         )
     
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         youtube_url = extract_youtube_url(message.text)
 
         if youtube_url:
@@ -66,13 +84,21 @@ class YoutubeAgent(AgentBase):
                 await send_message(self._("Transcription downloaded. Generating summary."))
 
                 video_title, video_date = get_video_metadata(video_id)
-                summary_content = summarize_transcription(transcription, self.llm)
                 
-                full_summary = f"""{self._("Title")}: {video_title}
+                header = f"""{self._("Title")}: {video_title}
 {self._("Publication date")}: {video_date}
 
-{summary_content}
 """
+                await send_message(header)
+                
+                summary_content = await summarize_transcription(
+                    transcription, 
+                    self.llm, 
+                    stream_chunk=stream_chunk
+                )
+                
+                full_summary = header + summary_content
+                
                 self._save_message('user', message.text, f"{self.user_id}:{self.agent_id}")
                 self._save_message('tool', transcription, session_id)
                 self._save_message('assistant', full_summary, session_id)
@@ -131,8 +157,8 @@ class YoutubeAgent(AgentBase):
             messages.append(HumanMessage(content=message.text))
             
             try:
-                response = self.llm.invoke(messages)
-                response_content = response.content
+                response_content = await stream_llm_response(self.llm, messages, stream_chunk)
+                
                 self._save_message('user', message.text, last_session_id)
                 self._save_message('assistant', response_content, last_session_id)
                 return self.response(response_content)

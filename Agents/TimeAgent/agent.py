@@ -30,7 +30,7 @@ class TimeAgent(AgentBase):
     def name(self) -> str:
         return "time"
         
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         self._save_user_message(message)
         
         try:

@@ -1,4 +1,7 @@
-def summarize_transcription(transcription: str, llm) -> str:
+async def summarize_transcription(transcription: str, llm, stream_chunk):
+    from langchain_core.messages import HumanMessage
+    from Agents.streaming_utils import stream_llm_response
+    
     prompt = f"""
 Utwórz skrótowe podsumowanie transkrypcji z youtube. Wypisz główne poruszone w transkrypcji tematy w formie podpunktów. 
 Podsumowanie ma być krótkie i zwięzłe.
@@ -53,11 +56,8 @@ Transkrypcja:
 """
     
     try:
-        from langchain_core.messages import HumanMessage
         messages = [HumanMessage(content=prompt)]
-        response = llm.invoke(messages)
-        result = response.content
-        return result if result else "No content returned from API"
+        return await stream_llm_response(llm, messages, stream_chunk)
         
     except Exception as e:
         error_msg = f"Error generating summary: {e}"

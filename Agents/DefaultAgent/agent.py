@@ -15,7 +15,7 @@ class DefaultAgent(AgentBase):
             temperature=self.agent_configuration.get('temperature', 0.7)
         )
     
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         system_prompt = "You are a helpful AI assistant. CRITICAL: Keep your responses as SHORT as possible. Be concise, direct, and avoid unnecessary explanations. Use the minimum number of words needed to answer. Respond in the same language as the user's message."
         
         chat_history = self._get_chat_history()
