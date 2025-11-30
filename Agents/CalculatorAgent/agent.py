@@ -113,7 +113,7 @@ class CalculatorAgent(AgentBase):
             return '\n'.join(tool_info) + '\n\n'
         return ''
     
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         session_id = f"{self.user_id}:{self.agent_id}"
         
         try:

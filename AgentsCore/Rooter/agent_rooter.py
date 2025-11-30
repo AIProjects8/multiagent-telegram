@@ -136,10 +136,10 @@ class AgentRooter:
             
         return self._get_agent_instance(user_id, current_agent['name'])
     
-    async def ask_current_agent(self, message: Message, send_message: Any) -> str:
+    async def ask_current_agent(self, message: Message, send_message: Any, stream_chunk: Any = None) -> str:
         agent_instance = self._get_current_agent_instance(message.user_id)
         if agent_instance:
-            return await agent_instance.ask(message, send_message)
+            return await agent_instance.ask(message, send_message, stream_chunk)
         return "No agent available to respond"
 
     def switch(self, message: Message) -> bool:

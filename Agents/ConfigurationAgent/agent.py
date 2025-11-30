@@ -21,7 +21,7 @@ class ConfigurationAgent(AgentBase):
             'city': self._ask_city
         }
     
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         self._save_user_message(message)
         
         if self._is_configuration_complete():

@@ -103,7 +103,7 @@ class AgentBase(ABC):
             self._chat_history.clear()
     
     @abstractmethod
-    async def ask(self, message: Message, send_message: Callable[[str], Any]) -> str:
+    async def ask(self, message: Message, send_message: Callable[[str], Any], stream_chunk: Callable[[str, str], Any] = None) -> str:
         pass
     
     @property

@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from TelegramBot.Tools.auth_decorator import restricted
+from TelegramBot.Tools.streaming_handler import TelegramStreamingHandler
 from SqlDB.middleware import update_db_user
 from SqlDB.user_cache import UserCache
 from AgentsCore.Rooter.agent_rooter import get_agent_rooter
@@ -43,6 +44,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     async def send_message(text: str):
         await update.message.reply_text(text)
-
-    response = await get_agent_rooter().ask_current_agent(message_obj, send_message)
-    await update.message.reply_text(response)
+    
+    streaming_handler = TelegramStreamingHandler(update)
+    response = await get_agent_rooter().ask_current_agent(message_obj, send_message, streaming_handler.stream_chunk)
+    
+    await streaming_handler.finalize(response)
