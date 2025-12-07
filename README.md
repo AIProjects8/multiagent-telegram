@@ -7,7 +7,7 @@ If you want to run multiple agents in single telegram bot - this is the right pl
 
 ### Overview
 
-<img width="2786" height="1616" alt="image" src="https://github.com/user-attachments/assets/a3ed136b-39de-4d35-8228-1d4a365bf78f" />
+<img width="2783" height="1477" alt="image" src="https://github.com/user-attachments/assets/bbcdd6f6-d701-4500-a80c-3a4c4645e9dd" />
 
 ### Prerequisites
 
