@@ -86,11 +86,12 @@ sleep 2
 echo "Step 8: Running database migrations..."
 if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps | grep -q "bot.*Up"; then
     echo "Running migrations in bot container..."
-    if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T bot python3 /app/run_migrations.py; then
+    if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T bot sh -c "cd /app && python3 run_migrations.py"; then
         echo "✓ Migrations completed successfully"
     else
         echo "✗ Migration failed, but continuing deployment"
         echo "Migrations will be retried when the bot starts"
+        echo "To debug, run: $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE exec bot python3 run_migrations.py"
     fi
 else
     echo "Warning: Bot container not running yet, migrations will run on bot startup"
