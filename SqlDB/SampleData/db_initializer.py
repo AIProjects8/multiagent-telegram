@@ -12,10 +12,10 @@ def init_configuration_agent(db: Session):
             configuration={
                 'temperature': 0.1
             },
-            display_name=[
-                {"language": "en", "name": "Configuration"},
-                {"language": "pl", "name": "Konfiguracja"}
-            ]
+            display_name={
+                "en": "Configuration",
+                "pl": "Konfiguracja"
+            }
         )
         
         db.add(agent)
@@ -23,10 +23,10 @@ def init_configuration_agent(db: Session):
         print("Configuration agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "Configuration"},
-                {"language": "pl", "name": "Konfiguracja"}
-            ]
+            existing_agent.display_name = {
+                "en": "Configuration",
+                "pl": "Konfiguracja"
+            }
             db.commit()
             print("Configuration agent display_name updated")
         else:
@@ -61,10 +61,10 @@ def init_weather_agent(db: Session):
             name='weather',
             keywords='pogoda,pogodowy,pogodny,pogodę,pogode',
             configuration=weather_config,
-            display_name=[
-                {"language": "en", "name": "Weather"},
-                {"language": "pl", "name": "Pogoda"}
-            ]
+            display_name={
+                "en": "Weather",
+                "pl": "Pogoda"
+            }
         )
         
         db.add(weather_agent)
@@ -72,10 +72,10 @@ def init_weather_agent(db: Session):
         print("Weather agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "Weather"},
-                {"language": "pl", "name": "Pogoda"}
-            ]
+            existing_agent.display_name = {
+                "en": "Weather",
+                "pl": "Pogoda"
+            }
             db.commit()
             print("Weather agent display_name updated")
         else:
@@ -93,10 +93,10 @@ def init_default_agent(db: Session):
             name='default',
             keywords='domyślny, default',
             configuration=config,
-            display_name=[
-                {"language": "en", "name": "Default"},
-                {"language": "pl", "name": "Domyślny"}
-            ]
+            display_name={
+                "en": "Default",
+                "pl": "Domyślny"
+            }
         )
         
         db.add(agent)
@@ -104,10 +104,10 @@ def init_default_agent(db: Session):
         print("Default agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "Default"},
-                {"language": "pl", "name": "Domyślny"}
-            ]
+            existing_agent.display_name = {
+                "en": "Default",
+                "pl": "Domyślny"
+            }
             db.commit()
             print("Default agent display_name updated")
         else:
@@ -125,10 +125,10 @@ def init_time_agent(db: Session):
             name='time',
             keywords='czas,zegarek',
             configuration=time_config,
-            display_name=[
-                {"language": "en", "name": "Time"},
-                {"language": "pl", "name": "Czas"}
-            ]
+            display_name={
+                "en": "Time",
+                "pl": "Czas"
+            }
         )
         
         db.add(time_agent)
@@ -136,10 +136,10 @@ def init_time_agent(db: Session):
         print("Time agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "Time"},
-                {"language": "pl", "name": "Czas"}
-            ]
+            existing_agent.display_name = {
+                "en": "Time",
+                "pl": "Czas"
+            }
             db.commit()
             print("Time agent display_name updated")
         else:
@@ -157,10 +157,10 @@ def init_youtube_agent(db: Session):
             name='youtube',
             keywords='youtube',
             configuration=youtube_config,
-            display_name=[
-                {"language": "en", "name": "YouTube"},
-                {"language": "pl", "name": "YouTube"}
-            ]
+            display_name={
+                "en": "YouTube",
+                "pl": "YouTube"
+            }
         )
         
         db.add(youtube_agent)
@@ -168,10 +168,10 @@ def init_youtube_agent(db: Session):
         print("Youtube agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "YouTube"},
-                {"language": "pl", "name": "YouTube"}
-            ]
+            existing_agent.display_name = {
+                "en": "YouTube",
+                "pl": "YouTube"
+            }
             db.commit()
             print("Youtube agent display_name updated")
         else:
@@ -189,10 +189,10 @@ def init_calculator_agent(db: Session):
             name='calculator',
             keywords='kalkulator',
             configuration=calculator_config,
-            display_name=[
-                {"language": "en", "name": "Calculator"},
-                {"language": "pl", "name": "Kalkulator"}
-            ]
+            display_name={
+                "en": "Calculator",
+                "pl": "Kalkulator"
+            }
         )
         
         db.add(calculator_agent)
@@ -200,10 +200,10 @@ def init_calculator_agent(db: Session):
         print("Calculator agent created successfully")
     else:
         if existing_agent.display_name is None:
-            existing_agent.display_name = [
-                {"language": "en", "name": "Calculator"},
-                {"language": "pl", "name": "Kalkulator"}
-            ]
+            existing_agent.display_name = {
+                "en": "Calculator",
+                "pl": "Kalkulator"
+            }
             db.commit()
             print("Calculator agent display_name updated")
         else:

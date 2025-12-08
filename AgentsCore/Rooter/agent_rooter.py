@@ -37,6 +37,7 @@ class AgentRooter:
         self._agent_instances = {}
         self._user_manager = UserManager()
         self._translators = {}
+        self._user_languages = {}
 
     def _load_agents(self):
         session = Session(engine)
@@ -147,27 +148,35 @@ class AgentRooter:
         return user.configuration['language']
     
     def _get_translator(self, user_id: str):
-        if user_id not in self._translators:
-            user_lang = self._get_user_language(user_id)
-            
-            if user_lang == 'en':
-                self._translators[user_id] = gettext.NullTranslations()
-            else:
-                try:
-                    locale_dir = Path(__file__).parent / 'locale'
-                    mo_file = locale_dir / user_lang / 'LC_MESSAGES' / 'messages.mo'
-                    
-                    if mo_file.exists():
-                        self._translators[user_id] = gettext.translation(
-                            'messages',
-                            localedir=str(locale_dir),
-                            languages=[user_lang]
-                        )
-                    else:
-                        self._translators[user_id] = gettext.NullTranslations()
-                except Exception as e:
-                    print(f"Exception creating translator for user {user_id}: {e}")
+        user_lang = self._get_user_language(user_id)
+        
+        if user_id in self._user_languages and self._user_languages[user_id] != user_lang:
+            if user_id in self._translators:
+                del self._translators[user_id]
+        
+        self._user_languages[user_id] = user_lang
+        
+        if user_id in self._translators:
+            return self._translators[user_id]
+        
+        if user_lang == 'en':
+            self._translators[user_id] = gettext.NullTranslations()
+        else:
+            try:
+                locale_dir = Path(__file__).parent / 'locale'
+                mo_file = locale_dir / user_lang / 'LC_MESSAGES' / 'messages.mo'
+                
+                if mo_file.exists():
+                    self._translators[user_id] = gettext.translation(
+                        'messages',
+                        localedir=str(locale_dir),
+                        languages=[user_lang]
+                    )
+                else:
                     self._translators[user_id] = gettext.NullTranslations()
+            except Exception as e:
+                print(f"Exception creating translator for user {user_id}: {e}")
+                self._translators[user_id] = gettext.NullTranslations()
         return self._translators[user_id]
     
     def _(self, user_id: str, message: str) -> str:
@@ -176,10 +185,11 @@ class AgentRooter:
     
     def _get_agent_display_name(self, agent: dict, user_language: str) -> str:
         display_name = agent.get('display_name')
-        if display_name and isinstance(display_name, list):
-            for item in display_name:
-                if isinstance(item, dict) and item.get('language') == user_language:
-                    return item.get('name', agent['name'])
+        if display_name and isinstance(display_name, dict):
+            if user_language in display_name:
+                return display_name[user_language]
+            if 'en' in display_name:
+                return display_name['en']
         return agent['name']
     
     async def ask_current_agent(self, message: Message, send_message: Any, stream_chunk: Any = None) -> str:
