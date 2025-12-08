@@ -69,13 +69,39 @@ $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d
 echo ""
 
 echo "Step 7: Waiting for services to be healthy..."
-sleep 5
+echo "Waiting for database to be ready..."
+for i in {1..30}; do
+    if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T postgres pg_isready > /dev/null 2>&1; then
+        echo "✓ Database is ready"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "Warning: Database not ready after 30 seconds, continuing anyway"
+    else
+        sleep 1
+    fi
+done
+sleep 2
 
-echo "Step 8: Checking service status..."
+echo "Step 8: Running database migrations..."
+if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps | grep -q "bot.*Up"; then
+    echo "Running migrations in bot container..."
+    if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T bot python3 /app/run_migrations.py; then
+        echo "✓ Migrations completed successfully"
+    else
+        echo "✗ Migration failed, but continuing deployment"
+        echo "Migrations will be retried when the bot starts"
+    fi
+else
+    echo "Warning: Bot container not running yet, migrations will run on bot startup"
+fi
+echo ""
+
+echo "Step 9: Checking service status..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps
 echo ""
 
-echo "Step 9: Viewing logs (last 50 lines)..."
+echo "Step 10: Viewing logs (last 50 lines)..."
 echo "--- Bot logs ---"
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" logs --tail=50 bot
 echo ""

@@ -2,6 +2,8 @@ from SqlDB.database import Session, engine
 from SqlDB.models import Agent, AgentItem
 import os
 import json
+import gettext
+from pathlib import Path
 from typing import Optional, Any
 from config import Config
 from SqlDB.user_cache import UserCache
@@ -34,6 +36,7 @@ class AgentRooter:
         self._default_agent = None
         self._agent_instances = {}
         self._user_manager = UserManager()
+        self._translators = {}
 
     def _load_agents(self):
         session = Session(engine)
@@ -49,7 +52,8 @@ class AgentRooter:
                     'id': str(agent.id),
                     'name': agent.name,
                     'keywords': keywords,
-                    'configuration': agent_configuration
+                    'configuration': agent_configuration,
+                    'display_name': agent.display_name
                 }
                 self._agents.append(agent_obj)
                 for kw in keywords:
@@ -136,32 +140,79 @@ class AgentRooter:
             
         return self._get_agent_instance(user_id, current_agent['name'])
     
+    def _get_user_language(self, user_id: str) -> str:
+        user = self._user_manager.cache.get_user_by_id(user_id)
+        if not user or not user.configuration or not user.configuration.get('language'):
+            return 'en'
+        return user.configuration['language']
+    
+    def _get_translator(self, user_id: str):
+        if user_id not in self._translators:
+            user_lang = self._get_user_language(user_id)
+            
+            if user_lang == 'en':
+                self._translators[user_id] = gettext.NullTranslations()
+            else:
+                try:
+                    locale_dir = Path(__file__).parent / 'locale'
+                    mo_file = locale_dir / user_lang / 'LC_MESSAGES' / 'messages.mo'
+                    
+                    if mo_file.exists():
+                        self._translators[user_id] = gettext.translation(
+                            'messages',
+                            localedir=str(locale_dir),
+                            languages=[user_lang]
+                        )
+                    else:
+                        self._translators[user_id] = gettext.NullTranslations()
+                except Exception as e:
+                    print(f"Exception creating translator for user {user_id}: {e}")
+                    self._translators[user_id] = gettext.NullTranslations()
+        return self._translators[user_id]
+    
+    def _(self, user_id: str, message: str) -> str:
+        translator = self._get_translator(user_id)
+        return translator.gettext(message)
+    
+    def _get_agent_display_name(self, agent: dict, user_language: str) -> str:
+        display_name = agent.get('display_name')
+        if display_name and isinstance(display_name, list):
+            for item in display_name:
+                if isinstance(item, dict) and item.get('language') == user_language:
+                    return item.get('name', agent['name'])
+        return agent['name']
+    
     async def ask_current_agent(self, message: Message, send_message: Any, stream_chunk: Any = None) -> str:
         agent_instance = self._get_current_agent_instance(message.user_id)
         if agent_instance:
             return await agent_instance.ask(message, send_message, stream_chunk)
         return "No agent available to respond"
 
-    def switch(self, message: Message) -> bool:
-        # First, check if user has configuration - if not, force to ConfigurationAgent
+    def switch(self, message: Message) -> Optional[str]:
+        switched_agent = None
+        
         if not self._user_has_configuration(message.user_id):
             configuration_agent = self._get_configuration_agent()
             if configuration_agent and self.current_agents.get(message.user_id) != configuration_agent:
                 self.current_agents[message.user_id] = configuration_agent
+                switched_agent = configuration_agent
                 print(f"User {message.user_id} has no configuration, forced to ConfigurationAgent")
-                return True
-            return False
+        else:
+            agent = self.find_agent_in_message(message)
+            temp_current_agent = self._get_current_agent(message.user_id)
+            
+            if agent and (temp_current_agent is None or agent['id'] != temp_current_agent['id']):
+                self.current_agents[message.user_id] = agent
+                switched_agent = agent
+                print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
         
-        # If user has configuration, check for explicit agent switching
-        agent = self.find_agent_in_message(message)
-        temp_current_agent = self._get_current_agent(message.user_id)
+        if switched_agent:
+            user_language = self._get_user_language(message.user_id)
+            agent_display_name = self._get_agent_display_name(switched_agent, user_language)
+            translated_message = self._(message.user_id, "Switched to agent: {agent_name}").format(agent_name=agent_display_name)
+            return translated_message
         
-        if agent and (temp_current_agent is None or agent['id'] != temp_current_agent['id']):
-            self.current_agents[message.user_id] = agent
-            print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
-            return True
-        
-        return False
+        return None
 
 def get_agent_rooter():
     return AgentRooter()

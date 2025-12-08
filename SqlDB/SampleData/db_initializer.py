@@ -11,14 +11,26 @@ def init_configuration_agent(db: Session):
             keywords='konfiguracja,konfig,config',
             configuration={
                 'temperature': 0.1
-            }
+            },
+            display_name=[
+                {"language": "en", "name": "Configuration"},
+                {"language": "pl", "name": "Konfiguracja"}
+            ]
         )
         
         db.add(agent)
         db.commit()
         print("Configuration agent created successfully")
     else:
-        print("Configuration agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "Configuration"},
+                {"language": "pl", "name": "Konfiguracja"}
+            ]
+            db.commit()
+            print("Configuration agent display_name updated")
+        else:
+            print("Configuration agent already exists")
 
 def init_user(db: Session):
     existing_user = db.query(User).filter(User.telegram_id == 8133073522).first()
@@ -48,14 +60,26 @@ def init_weather_agent(db: Session):
         weather_agent = Agent(
             name='weather',
             keywords='pogoda,pogodowy,pogodny,pogodę,pogode',
-            configuration=weather_config
+            configuration=weather_config,
+            display_name=[
+                {"language": "en", "name": "Weather"},
+                {"language": "pl", "name": "Pogoda"}
+            ]
         )
         
         db.add(weather_agent)
         db.commit()
         print("Weather agent created successfully")
     else:
-        print("Weather agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "Weather"},
+                {"language": "pl", "name": "Pogoda"}
+            ]
+            db.commit()
+            print("Weather agent display_name updated")
+        else:
+            print("Weather agent already exists")
         
 def init_default_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'default').first()
@@ -68,14 +92,26 @@ def init_default_agent(db: Session):
         agent = Agent(
             name='default',
             keywords='domyślny, default',
-            configuration=config
+            configuration=config,
+            display_name=[
+                {"language": "en", "name": "Default"},
+                {"language": "pl", "name": "Domyślny"}
+            ]
         )
         
         db.add(agent)
         db.commit()
         print("Default agent created successfully")
     else:
-        print("Default agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "Default"},
+                {"language": "pl", "name": "Domyślny"}
+            ]
+            db.commit()
+            print("Default agent display_name updated")
+        else:
+            print("Default agent already exists")
 
 def init_time_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'time').first()
@@ -88,14 +124,26 @@ def init_time_agent(db: Session):
         time_agent = Agent(
             name='time',
             keywords='czas,zegarek',
-            configuration=time_config
+            configuration=time_config,
+            display_name=[
+                {"language": "en", "name": "Time"},
+                {"language": "pl", "name": "Czas"}
+            ]
         )
         
         db.add(time_agent)
         db.commit()
         print("Time agent created successfully")
     else:
-        print("Time agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "Time"},
+                {"language": "pl", "name": "Czas"}
+            ]
+            db.commit()
+            print("Time agent display_name updated")
+        else:
+            print("Time agent already exists")
 
 def init_youtube_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'youtube').first()
@@ -108,14 +156,26 @@ def init_youtube_agent(db: Session):
         youtube_agent = Agent(
             name='youtube',
             keywords='youtube',
-            configuration=youtube_config
+            configuration=youtube_config,
+            display_name=[
+                {"language": "en", "name": "YouTube"},
+                {"language": "pl", "name": "YouTube"}
+            ]
         )
         
         db.add(youtube_agent)
         db.commit()
         print("Youtube agent created successfully")
     else:
-        print("Youtube agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "YouTube"},
+                {"language": "pl", "name": "YouTube"}
+            ]
+            db.commit()
+            print("Youtube agent display_name updated")
+        else:
+            print("Youtube agent already exists")
 
 def init_calculator_agent(db: Session):
     existing_agent = db.query(Agent).filter(Agent.name == 'calculator').first()
@@ -128,14 +188,26 @@ def init_calculator_agent(db: Session):
         calculator_agent = Agent(
             name='calculator',
             keywords='kalkulator',
-            configuration=calculator_config
+            configuration=calculator_config,
+            display_name=[
+                {"language": "en", "name": "Calculator"},
+                {"language": "pl", "name": "Kalkulator"}
+            ]
         )
         
         db.add(calculator_agent)
         db.commit()
         print("Calculator agent created successfully")
     else:
-        print("Calculator agent already exists")
+        if existing_agent.display_name is None:
+            existing_agent.display_name = [
+                {"language": "en", "name": "Calculator"},
+                {"language": "pl", "name": "Kalkulator"}
+            ]
+            db.commit()
+            print("Calculator agent display_name updated")
+        else:
+            print("Calculator agent already exists")
 
 def init_agent_item(db: Session):
     user = db.query(User).filter(User.telegram_id == 8133073522).first()

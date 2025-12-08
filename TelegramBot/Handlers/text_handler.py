@@ -34,10 +34,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message_obj = MessageProcessor.create_message(text, user_language, ui_language, user_id)
     
-    switched = get_agent_rooter().switch(message_obj)
-    agent = get_agent_rooter().current_agents[user_id]
-    if switched:
-        await update.message.reply_text(f"Switched to agent: {agent['name']}")
+    switch_message = get_agent_rooter().switch(message_obj)
+    if switch_message:
+        await update.message.reply_text(switch_message)
 
     if not MessageProcessor.should_process_message(message_obj.text):
         return

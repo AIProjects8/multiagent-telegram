@@ -26,6 +26,7 @@ class Agent(Base):
     name = Column(String(255), nullable=False)
     keywords = Column(String(1000), nullable=False)
     configuration = Column(JSON)
+    display_name = Column(JSON, nullable=True)
 
 
 class AgentItem(Base):
