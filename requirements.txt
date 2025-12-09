@@ -14,3 +14,4 @@ timezonefinder==8.1.0
 pytest==8.4.2
 python-gettext==5.0
 youtube-transcript-api==1.2.3
+alembic==1.17.2
