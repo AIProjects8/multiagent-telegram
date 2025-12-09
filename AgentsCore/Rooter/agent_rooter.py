@@ -147,37 +147,42 @@ class AgentRooter:
             return 'en'
         return user.configuration['language']
     
-    def _get_translator(self, user_id: str):
-        user_lang = self._get_user_language(user_id)
+    def _get_translator(self, user_id: str, language: Optional[str] = None):
+        if language is None:
+            user_lang = self._get_user_language(user_id)
+        else:
+            user_lang = language
         
-        if user_id in self._user_languages and self._user_languages[user_id] != user_lang:
-            if user_id in self._translators:
-                del self._translators[user_id]
+        cache_key = f"{user_id}_{user_lang}" if language else user_id
         
-        self._user_languages[user_id] = user_lang
+        if language is None:
+            if user_id in self._user_languages and self._user_languages[user_id] != user_lang:
+                if user_id in self._translators:
+                    del self._translators[user_id]
+            self._user_languages[user_id] = user_lang
         
-        if user_id in self._translators:
-            return self._translators[user_id]
+        if cache_key in self._translators:
+            return self._translators[cache_key]
         
         if user_lang == 'en':
-            self._translators[user_id] = gettext.NullTranslations()
+            self._translators[cache_key] = gettext.NullTranslations()
         else:
             try:
                 locale_dir = Path(__file__).parent / 'locale'
                 mo_file = locale_dir / user_lang / 'LC_MESSAGES' / 'messages.mo'
                 
                 if mo_file.exists():
-                    self._translators[user_id] = gettext.translation(
+                    self._translators[cache_key] = gettext.translation(
                         'messages',
                         localedir=str(locale_dir),
                         languages=[user_lang]
                     )
                 else:
-                    self._translators[user_id] = gettext.NullTranslations()
+                    self._translators[cache_key] = gettext.NullTranslations()
             except Exception as e:
                 print(f"Exception creating translator for user {user_id}: {e}")
-                self._translators[user_id] = gettext.NullTranslations()
-        return self._translators[user_id]
+                self._translators[cache_key] = gettext.NullTranslations()
+        return self._translators[cache_key]
     
     def _(self, user_id: str, message: str) -> str:
         translator = self._get_translator(user_id)
@@ -197,6 +202,36 @@ class AgentRooter:
         if agent_instance:
             return await agent_instance.ask(message, send_message, stream_chunk)
         return "No agent available to respond"
+
+    def check_which_agent_query(self, message: Message) -> Optional[str]:
+        user_language = self._get_user_language(message.user_id)
+        msg_lower = message.text.lower().strip()
+        words = msg_lower.split()
+        
+        if len(words) < 2:
+            return None
+        
+        translator = self._get_translator(message.user_id)
+        commands_str = translator.gettext("which,what")
+        commands = [cmd.strip() for cmd in commands_str.split(',') if cmd.strip()]
+        
+        if user_language != 'en':
+            en_translator = self._get_translator(message.user_id, 'en')
+            en_commands_str = en_translator.gettext("which,what")
+            en_commands = [cmd.strip() for cmd in en_commands_str.split(',') if cmd.strip()]
+            commands.extend(en_commands)
+        
+        first_word = words[0]
+        second_word = words[1] if len(words) > 1 else ""
+        
+        if first_word in commands and second_word == "agent":
+            current_agent = self._get_current_agent(message.user_id)
+            if current_agent:
+                agent_display_name = self._get_agent_display_name(current_agent, user_language)
+                response = self._(message.user_id, "The current agent is: {agent_name}").format(agent_name=agent_display_name)
+                return response
+        
+        return None
 
     def switch(self, message: Message) -> Optional[str]:
         switched_agent = None

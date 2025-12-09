@@ -34,6 +34,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message_obj = MessageProcessor.create_message(text, user_language, ui_language, user_id)
     
+    which_agent_response = get_agent_rooter().check_which_agent_query(message_obj)
+    if which_agent_response:
+        await update.message.reply_text(which_agent_response)
+        return
+    
     switch_message = get_agent_rooter().switch(message_obj)
     if switch_message:
         await update.message.reply_text(switch_message)

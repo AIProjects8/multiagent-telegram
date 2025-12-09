@@ -14,3 +14,9 @@ msgstr ""
 msgid "Switched to agent: {agent_name}"
 msgstr "Przełączono na agenta: {agent_name}"
 
+msgid "which,what"
+msgstr "jaki,który"
+
+msgid "The current agent is: {agent_name}"
+msgstr "Aktualny agent to: {agent_name}"
+

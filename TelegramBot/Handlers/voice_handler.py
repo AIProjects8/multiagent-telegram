@@ -35,6 +35,12 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_obj = MessageProcessor.create_message(transcribed_text, user_language, ui_language, user_id)
     
+    which_agent_response = get_agent_rooter().check_which_agent_query(message_obj)
+    if which_agent_response:
+        await update.message.reply_text(which_agent_response)
+        os.remove(audio_path)
+        return
+    
     switched = get_agent_rooter().switch(message_obj)
     
     if switched:
