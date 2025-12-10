@@ -37,8 +37,9 @@ fi
 echo "✓ Docker and Docker Compose found"
 echo ""
 
-echo "Step 2: Stopping existing containers..."
-$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" down
+echo "Step 2: Stopping bot and scheduler containers..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" stop bot scheduler
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" rm -f bot scheduler
 echo ""
 
 echo "Step 3: Pulling latest code (if using git)..."
@@ -64,12 +65,16 @@ echo "Step 5: Building Docker images..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" build --no-cache
 echo ""
 
-echo "Step 6: Starting services..."
-$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d
+echo "Step 6: Ensuring database is running..."
+if ! $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps | grep -q "postgres.*Up"; then
+    echo "Starting database..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d postgres
+else
+    echo "✓ Database is already running"
+fi
 echo ""
 
-echo "Step 7: Waiting for services to be healthy..."
-echo "Waiting for database to be ready..."
+echo "Step 7: Waiting for database to be ready..."
 for i in {1..30}; do
     if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T postgres pg_isready > /dev/null 2>&1; then
         echo "✓ Database is ready"
@@ -84,24 +89,26 @@ done
 sleep 2
 
 echo "Step 8: Running database migrations (Alembic)..."
-if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps | grep -q "bot.*Up"; then
-    echo "Running Alembic migrations in bot container..."
-    if $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" exec -T bot sh -c "cd /app && alembic upgrade head"; then
-        echo "✓ Migrations completed successfully"
-    else
-        echo "✗ Migration failed, but continuing deployment"
-        echo "To debug, run: $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE exec bot alembic upgrade head"
-    fi
+echo "Running migrations in temporary container..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" run --rm bot sh -c "cd /app && alembic upgrade head"
+if [ $? -eq 0 ]; then
+    echo "✓ Migrations completed successfully"
 else
-    echo "Warning: Bot container not running yet, migrations will run on bot startup"
+    echo "✗ Migration failed!"
+    echo "To debug, run: $COMPOSE_CMD -f $COMPOSE_FILE -f $PROD_COMPOSE_FILE run --rm bot alembic upgrade head"
+    exit 1
 fi
 echo ""
 
-echo "Step 8: Checking service status..."
+echo "Step 9: Starting bot and scheduler services..."
+$COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" up -d bot scheduler
+echo ""
+
+echo "Step 10: Checking service status..."
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" ps
 echo ""
 
-echo "Step 9: Viewing logs (last 50 lines)..."
+echo "Step 11: Viewing logs (last 50 lines)..."
 echo "--- Bot logs ---"
 $COMPOSE_CMD -f "$COMPOSE_FILE" -f "$PROD_COMPOSE_FILE" logs --tail=50 bot
 echo ""
