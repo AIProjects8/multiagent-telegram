@@ -23,3 +23,6 @@ msgstr "Aktualny agent to: {agent_name}"
 msgid "Agent '{agent_name}' does not exist."
 msgstr "Agent '{agent_name}' nie istnieje."
 
+msgid "You are already using agent: {agent_name}"
+msgstr "Już używasz agenta: {agent_name}"
+

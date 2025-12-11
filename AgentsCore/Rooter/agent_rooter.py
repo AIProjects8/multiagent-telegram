@@ -279,10 +279,18 @@ class AgentRooter:
             agent = self.find_agent_in_message(message)
             temp_current_agent = self._get_current_agent(message.user_id)
             
-            if agent and (temp_current_agent is None or agent['id'] != temp_current_agent['id']):
-                self.current_agents[message.user_id] = agent
-                switched_agent = agent
-                print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
+            if agent:
+                if temp_current_agent is None or agent['id'] != temp_current_agent['id']:
+                    self.current_agents[message.user_id] = agent
+                    switched_agent = agent
+                    print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
+                else:
+                    user_language = self._get_user_language(message.user_id)
+                    agent_display_name = self._get_agent_display_name(agent, user_language)
+                    message_text = self._(message.user_id, "You are already using agent: {agent_name}").format(
+                        agent_name=agent_display_name
+                    )
+                    return message_text
             elif agent is None:
                 invalid_keyword = self._check_invalid_agent_request(message)
                 if invalid_keyword:
