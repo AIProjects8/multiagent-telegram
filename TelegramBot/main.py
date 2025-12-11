@@ -13,7 +13,6 @@ from TelegramBot.Commands.start_command import start_command
 from TelegramBot.Commands.help_command import help_command
 from TelegramBot.Commands.version_command import version_command
 from TelegramBot.Handlers.errors_handler import error
-from SqlDB.database import init_db
 import logging
 
 config = Config.from_env()
@@ -21,9 +20,6 @@ config.validate()
 
 def start():
     print("Starting bot...")
-    
-    print("Initializing database...")
-    init_db()
     
     app = Application.builder().token(config.telegram_bot_token).build()
     

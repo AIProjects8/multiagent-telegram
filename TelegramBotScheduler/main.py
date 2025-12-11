@@ -6,7 +6,6 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
-from SqlDB.database import init_db
 from Modules.Scheduler.scheduler import SchedulerService
 
 logging.basicConfig(
@@ -21,9 +20,6 @@ async def main():
     
     config = Config.from_env()
     config.validate()
-    
-    logger.info("Initializing database...")
-    init_db()
     
     scheduler_service = SchedulerService(config)
     
