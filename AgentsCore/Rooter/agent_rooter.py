@@ -3,6 +3,7 @@ from SqlDB.models import Agent, AgentItem
 import os
 import json
 import gettext
+import re
 from pathlib import Path
 from typing import Optional, Any
 from config import Config
@@ -206,10 +207,6 @@ class AgentRooter:
     def check_which_agent_query(self, message: Message) -> Optional[str]:
         user_language = self._get_user_language(message.user_id)
         msg_lower = message.text.lower().strip()
-        words = msg_lower.split()
-        
-        if len(words) < 2:
-            return None
         
         translator = self._get_translator(message.user_id)
         commands_str = translator.gettext("which,what")
@@ -221,8 +218,13 @@ class AgentRooter:
             en_commands = [cmd.strip() for cmd in en_commands_str.split(',') if cmd.strip()]
             commands.extend(en_commands)
         
-        first_word = words[0]
-        second_word = words[1] if len(words) > 1 else ""
+        words = re.findall(r'\b\w+\b', msg_lower)
+        
+        if len(words) < 2:
+            return None
+        
+        first_word = words[0].strip()
+        second_word = words[1].strip() if len(words) > 1 else ""
         
         if first_word in commands and second_word == "agent":
             current_agent = self._get_current_agent(message.user_id)
