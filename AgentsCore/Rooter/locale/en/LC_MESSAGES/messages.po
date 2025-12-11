@@ -20,3 +20,6 @@ msgstr "which,what"
 msgid "The current agent is: {agent_name}"
 msgstr "The current agent is: {agent_name}"
 
+msgid "Agent '{agent_name}' does not exist."
+msgstr "Agent '{agent_name}' does not exist."
+

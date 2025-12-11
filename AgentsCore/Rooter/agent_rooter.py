@@ -117,7 +117,38 @@ class AgentRooter:
             if search in msg:
                 return agent
         return None
-
+    
+    def _extract_words(self, text: str) -> list:
+        text_lower = text.lower().strip()
+        return re.findall(r'\b\w+\b', text_lower)
+    
+    def _check_invalid_agent_request(self, message: Message) -> Optional[str]:
+        msg_lower = message.text.lower().strip()
+        app_keyword_pattern = f"{self._app_keyword} "
+        
+        if app_keyword_pattern not in msg_lower:
+            return None
+        
+        words = self._extract_words(msg_lower)
+        if len(words) < 2:
+            return None
+        
+        app_keyword_index = -1
+        for i, word in enumerate(words):
+            if word == self._app_keyword and i + 1 < len(words):
+                app_keyword_index = i
+                break
+        
+        if app_keyword_index == -1:
+            return None
+        
+        requested_keyword = words[app_keyword_index + 1] if app_keyword_index + 1 < len(words) else None
+        
+        if requested_keyword and requested_keyword not in self._agent_map:
+            return requested_keyword
+        
+        return None
+    
     def _get_current_agent(self, user_id: str):
         if user_id not in self.current_agents:
             # Set default agent initially
@@ -218,7 +249,7 @@ class AgentRooter:
             en_commands = [cmd.strip() for cmd in en_commands_str.split(',') if cmd.strip()]
             commands.extend(en_commands)
         
-        words = re.findall(r'\b\w+\b', msg_lower)
+        words = self._extract_words(msg_lower)
         
         if len(words) < 2:
             return None
@@ -252,6 +283,13 @@ class AgentRooter:
                 self.current_agents[message.user_id] = agent
                 switched_agent = agent
                 print(f"Switched to agent: {agent['id']} for user: {message.user_id}")
+            elif agent is None:
+                invalid_keyword = self._check_invalid_agent_request(message)
+                if invalid_keyword:
+                    error_message = self._(message.user_id, "Agent '{agent_name}' does not exist.").format(
+                        agent_name=invalid_keyword
+                    )
+                    return error_message
         
         if switched_agent:
             user_language = self._get_user_language(message.user_id)
