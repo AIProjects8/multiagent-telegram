@@ -54,14 +54,46 @@ def update_translations(agent_name):
     
     return True
 
+def update_rooter_translations():
+    """Update translations for Rooter"""
+    rooter_path = Path("AgentsCore/Rooter")
+    locale_path = rooter_path / "locale"
+    
+    if not locale_path.exists():
+        print("Locale directory not found for Rooter")
+        return False
+    
+    print("\nProcessing Rooter...")
+    for lang_dir in locale_path.iterdir():
+        if lang_dir.is_dir():
+            lc_messages = lang_dir / "LC_MESSAGES"
+            if lc_messages.exists():
+                po_file = lc_messages / "messages.po"
+                mo_file = lc_messages / "messages.mo"
+                
+                if po_file.exists():
+                    print(f"Compiling {po_file} to {mo_file}")
+                    po_abs = po_file.absolute()
+                    mo_abs = mo_file.absolute()
+                    if run_command(f"msgfmt {po_abs} -o {mo_abs}", cwd=lc_messages):
+                        print(f"✓ Compiled {lang_dir.name} for Rooter")
+                    else:
+                        print(f"✗ Failed to compile {lang_dir.name} for Rooter")
+                else:
+                    print(f"Warning: {po_file} not found for {lang_dir.name}")
+    
+    return True
+
 def update_all_translations():
-    """Update translations for all agents"""
+    """Update translations for all agents and Rooter"""
     agents = ["WeatherAgent", "TimeAgent", "DefaultAgent", "ConfigurationAgent", "YoutubeAgent"]
     
     print("Updating translations for all agents...")
     for agent in agents:
         print(f"\nProcessing {agent}...")
         update_translations(agent)
+    
+    update_rooter_translations()
     
     print("\nTranslation update complete!")
 
