@@ -120,7 +120,7 @@ class AgentRooter:
     
     def _extract_words(self, text: str) -> list:
         text_lower = text.lower().strip()
-        return re.findall(r'\b\w+\b', text_lower)
+        return re.findall(r'\b\w+\b', text_lower, re.UNICODE)
     
     def _check_invalid_agent_request(self, message: Message) -> Optional[str]:
         msg_lower = message.text.lower().strip()
